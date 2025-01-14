@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('registrations', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('user_id')->constrained('users');
+    $table->foreignId('user_id')->nullable()->constrained('users'); // Allow null for user_id
     $table->foreignId('form_id')->constrained('registration_forms');
     $table->string('company_name');
     $table->string('address');

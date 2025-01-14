@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Registration;
 use App\Models\RegistrationForm;
 use App\Models\DocumentRequirement;
@@ -65,9 +66,25 @@ class RegistrationController extends Controller
             'documents.*' => 'file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        // Create the registration record
+        // Check if a user exists with the provided mobile or email
+        $user = User::where('mobile_number', $validated['mobile'])
+                    ->orWhere('email', $validated['email'])
+                    ->first();
+
+        if (!$user) {
+            // Create a new user
+            $user = User::create([
+                'name' => $validated['company_name'], // Temporary name as company name
+                'email' => $validated['email'],
+                'mobile_number' => $validated['mobile'],
+                'password' => bcrypt('temporary-password'), // Temporary password
+                'role' => 'pending', // Assign a default role for new registrations
+            ]);
+        }
+
+        // Create the registration
         $registration = Registration::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'form_id' => $formDetails->id,
             'company_name' => $validated['company_name'],
             'address' => $validated['address'],

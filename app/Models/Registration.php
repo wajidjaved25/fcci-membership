@@ -31,23 +31,7 @@ class Registration extends Model
     ];
 
     /**
-     * Relationship with User.
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Relationship with RegistrationForm.
-     */
-    public function form()
-    {
-        return $this->belongsTo(RegistrationForm::class, 'form_id');
-    }
-
-    /**
-     * Relationship with Directors/Partners.
+     * Relationship with the DirectorPartner model.
      */
     public function directorsPartners()
     {
@@ -55,7 +39,7 @@ class Registration extends Model
     }
 
     /**
-     * Relationship with Registration Documents.
+     * Relationship with the RegistrationDocument model.
      */
     public function documents()
     {

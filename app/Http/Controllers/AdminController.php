@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Registration;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Notifications\MembershipStatusNotification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -29,6 +31,7 @@ class AdminController extends Controller
      * Show details of a specific registration.
      *
      * @param int $id
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show($id)
     {
@@ -48,20 +51,34 @@ class AdminController extends Controller
      *
      * @param Request $request
      * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function approve(Request $request, $id)
     {
-        // Ensure only admins can access this method
-        if (Auth::user()->role !== 'admin') {
-            return redirect('/home')->with('error', 'Access denied.');
+        $registration = Registration::findOrFail($id);
+
+        // Check if a user already exists for this registration
+        if ($registration->user_id) {
+            return redirect()->route('admin.dashboard')->with('error', 'User already exists for this registration.');
         }
 
-        $registration = Registration::findOrFail($id);
-        $registration->status = 'approved';
-        $registration->save();
+        // Create a new user
+        $user = User::create([
+            'name' => $registration->company_name, // Use company name or another appropriate field
+            'email' => $registration->email ?? 'no-email-' . $registration->id . '@example.com', // Handle cases without email
+            'mobile_number' => $registration->mobile,
+            'role' => 'member', // Assign the appropriate role
+            'password' => bcrypt(Str::random(8)), // Generate a random password
+        ]);
+
+        // Update the registration with the new user ID and status
+        $registration->update([
+            'user_id' => $user->id,
+            'status' => 'approved',
+        ]);
 
         // Notify the user via email/SMS
-        $registration->user->notify(new MembershipStatusNotification('approved'));
+        $user->notify(new MembershipStatusNotification('approved'));
 
         return redirect()->route('admin.dashboard')->with('success', 'Registration approved successfully.');
     }
@@ -71,6 +88,7 @@ class AdminController extends Controller
      *
      * @param Request $request
      * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function reject(Request $request, $id)
     {
@@ -84,9 +102,10 @@ class AdminController extends Controller
         ]);
 
         $registration = Registration::findOrFail($id);
-        $registration->status = 'rejected';
-        $registration->rejection_reason = $request->input('rejection_reason');
-        $registration->save();
+        $registration->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
 
         // Notify the user via email/SMS
         $registration->user->notify(new MembershipStatusNotification('rejected', $request->input('rejection_reason')));
