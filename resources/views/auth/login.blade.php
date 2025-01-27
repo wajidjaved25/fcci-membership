@@ -26,7 +26,7 @@
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-500 to-purple-600 shadow">
         <div class="container mx-auto px-4 py-6 flex justify-center">
-            <img src="{{ asset('images/fcci-logo.png') }}" alt="FCCI Logo" class="h-16 animate-bounce">
+            <img src="{{ asset('images/fcci-logo.png') }}" alt="FCCI Logo" class="h-16">
         </div>
     </header>
 
@@ -75,6 +75,7 @@
         </div>
     </main>
 
+    <!-- Script -->
     <script>
         const requestOtpForm = document.getElementById('request-otp-form');
         const verifyOtpForm = document.getElementById('verify-otp-form');
@@ -90,12 +91,14 @@
 
             axios.post('{{ route("login.request-otp") }}', { mobile_number: mobileNumber })
                 .then(response => {
+                    console.log('Response:', response.data); // Debugging the response
                     showModal(response.data.message);
                     document.getElementById('verify_mobile_number').value = mobileNumber;
                     requestOtpForm.style.display = 'none';
                     verifyOtpForm.style.display = 'block';
                 })
                 .catch(error => {
+                    console.error('Error:', error.response); // Debugging the error
                     showModal(error.response?.data?.message || 'An error occurred. Please try again.');
                 })
                 .finally(() => toggleLoading(requestOtpBtn, false));
@@ -109,10 +112,11 @@
 
             axios.post('{{ route("login.verify-otp") }}', { mobile_number: mobileNumber, otp: otp })
                 .then(response => {
-                    showModal(response.data.message);
-                    window.location.href = response.data.redirect_url;
+                    console.log('Redirect URL:', response.data.data.redirect_url); // Debugging the redirect URL
+                    window.location.href = response.data.data.redirect_url;
                 })
                 .catch(error => {
+                    console.error('Error during OTP verification:', error.response); // Debugging error
                     showModal(error.response?.data?.message || 'Invalid OTP. Please try again.');
                 })
                 .finally(() => toggleLoading(verifyOtpBtn, false));

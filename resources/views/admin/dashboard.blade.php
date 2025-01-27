@@ -13,9 +13,15 @@
         <div class="container mx-auto px-4 py-6 flex justify-between items-center">
             <img src="{{ asset('images/fcci-logo.png') }}" alt="FCCI Logo" class="h-16">
             <p class="text-white font-bold text-lg">Admin Dashboard</p>
-            <div class="text-white">
+            <div class="text-white flex items-center space-x-4">
                 <p class="font-medium">Welcome, {{ Auth::user()->name }}</p>
-                <a href="{{ route('logout') }}" class="text-sm underline">Logout</a>
+                <!-- Logout Link -->
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-sm underline hover:text-gray-300">
+                    Logout
+                </a>
             </div>
         </div>
     </header>

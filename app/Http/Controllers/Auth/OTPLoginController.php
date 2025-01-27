@@ -32,7 +32,7 @@ class OTPLoginController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User with the provided mobile number does not exist.',
+                'message' => 'No user found with the provided mobile number.',
             ], 404);
         }
 
@@ -44,7 +44,7 @@ class OTPLoginController extends Controller
         if ($this->otpService->sendOTP($user->mobile_number, $otp)) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'OTP has been sent successfully to the provided mobile number.',
+                'message' => 'OTP sent successfully to the provided mobile number.',
                 'data' => [
                     'mobile_number' => $request->mobile_number,
                     'expires_in' => '10 minutes',
@@ -73,7 +73,7 @@ class OTPLoginController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User with the provided mobile number does not exist.',
+                'message' => 'No user found with the provided mobile number.',
             ], 404);
         }
 
@@ -97,12 +97,10 @@ class OTPLoginController extends Controller
         // Clear OTP after successful login
         $user->update(['otp' => null, 'otp_expires_at' => null]);
 
-        // Redirect based on user role with a fallback
-        $redirectUrl = (strtolower($user->role) === 'admin') 
-            ? route('admin.dashboard') 
-            : url('/home');
-
-        $redirectUrl = $redirectUrl ?: url('/');
+        // Redirect based on role with fallback to the home page
+        $redirectUrl = strtolower($user->role) === 'admin' ? route('admin.dashboard') : url('/home');
+       // Log the redirect URL for debugging
+    \Log::info('Redirecting to: ' . $redirectUrl);
 
         return response()->json([
             'status' => 'success',

@@ -67,20 +67,17 @@ class RegistrationController extends Controller
         ]);
 
         // Check if a user exists with the provided mobile or email
-        $user = User::where('mobile_number', $validated['mobile'])
-                    ->orWhere('email', $validated['email'])
-                    ->first();
-
-        if (!$user) {
-            // Create a new user
-            $user = User::create([
-                'name' => $validated['company_name'], // Temporary name as company name
-                'email' => $validated['email'],
+        $user = User::firstOrCreate(
+            [
                 'mobile_number' => $validated['mobile'],
+                'email' => $validated['email'],
+            ],
+            [
+                'name' => $validated['company_name'],
                 'password' => bcrypt('temporary-password'), // Temporary password
-                'role' => 'pending', // Assign a default role for new registrations
-            ]);
-        }
+                'role' => 'pending',
+            ]
+        );
 
         // Create the registration
         $registration = Registration::create([
@@ -122,5 +119,80 @@ class RegistrationController extends Controller
         }
 
         return redirect()->route('home')->with('success', 'Registration submitted successfully.');
+    }
+
+    /**
+     * Workflow: Verify Documents
+     */
+    public function verifyDocuments($id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (Auth::user()->role !== 'membership_supervisor') {
+            return redirect()->route('home')->with('error', 'Unauthorized action.');
+        }
+
+        $registration->update(['status' => 'fee_due']);
+        return redirect()->route('admin.dashboard')->with('success', 'Documents verified. Fee payment required.');
+    }
+
+    /**
+     * Workflow: Collect Fee
+     */
+    public function collectFee($id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (Auth::user()->role !== 'cashier') {
+            return redirect()->route('home')->with('error', 'Unauthorized action.');
+        }
+
+        $registration->update(['status' => 'fee_paid']);
+        return redirect()->route('admin.dashboard')->with('success', 'Fee collected successfully.');
+    }
+
+    /**
+     * Workflow: Audit Documents
+     */
+    public function auditDocuments($id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (Auth::user()->role !== 'accounts_audit') {
+            return redirect()->route('home')->with('error', 'Unauthorized action.');
+        }
+
+        $registration->update(['status' => 'provisionally_approved']);
+        return redirect()->route('admin.dashboard')->with('success', 'Documents audited successfully.');
+    }
+
+    /**
+     * Workflow: Approve Provisional Membership
+     */
+    public function approveProvisionalMembership($id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (Auth::user()->role !== 'dg_secretary') {
+            return redirect()->route('home')->with('error', 'Unauthorized action.');
+        }
+
+        $registration->update(['status' => 'committee_review']);
+        return redirect()->route('admin.dashboard')->with('success', 'Provisional membership approved.');
+    }
+
+    /**
+     * Workflow: Grant Final Approval
+     */
+    public function grantFinalApproval($id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (Auth::user()->role !== 'chairman_president') {
+            return redirect()->route('home')->with('error', 'Unauthorized action.');
+        }
+
+        $registration->update(['status' => 'final_approval']);
+        return redirect()->route('admin.dashboard')->with('success', 'Membership approved.');
     }
 }

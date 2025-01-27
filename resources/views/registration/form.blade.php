@@ -6,6 +6,7 @@
     <title>Register for {{ $formDetails->name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.5.0/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Header -->
@@ -21,7 +22,7 @@
             <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Register for {{ $formDetails->name }}</h1>
             <p class="text-center text-gray-600 mb-8">{{ $formDetails->description }}</p>
 
-            <form action="{{ route('register.submit', $formDetails->name) }}" method="POST" enctype="multipart/form-data">
+            <form id="registration-form" action="{{ route('register.submit', $formDetails->name) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Company Details -->
@@ -52,14 +53,6 @@
                         <input type="url" id="website" name="website" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="testimonial_1" class="block text-sm font-medium text-gray-700">Testimonial 1</label>
-                        <input type="text" id="testimonial_1" name="testimonial_1" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="testimonial_2" class="block text-sm font-medium text-gray-700">Testimonial 2</label>
-                        <input type="text" id="testimonial_2" name="testimonial_2" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
                         <label for="membership_class" class="block text-sm font-medium text-gray-700">Membership Class</label>
                         <select id="membership_class" name="membership_class" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
                             <option value="Corporate">Corporate</option>
@@ -70,21 +63,18 @@
                         <label for="year_establishment" class="block text-sm font-medium text-gray-700">Year of Establishment</label>
                         <input type="number" id="year_establishment" name="year_establishment" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
                     </div>
+                </div>
+
+                <!-- Testimonial Details -->
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Testimonial Details</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="ntn" class="block text-sm font-medium text-gray-700">NTN</label>
-                        <input type="text" id="ntn" name="ntn" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        <label for="testimonial_1" class="block text-sm font-medium text-gray-700">Testimonial 1</label>
+                        <input type="text" id="testimonial_1" name="testimonial_1" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
                     </div>
                     <div>
-                        <label for="sales_tax_number" class="block text-sm font-medium text-gray-700">Sales Tax Number</label>
-                        <input type="text" id="sales_tax_number" name="sales_tax_number" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="main_business" class="block text-sm font-medium text-gray-700">Main Business</label>
-                        <input type="text" id="main_business" name="main_business" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="product_line" class="block text-sm font-medium text-gray-700">Product Line</label>
-                        <input type="text" id="product_line" name="product_line" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        <label for="testimonial_2" class="block text-sm font-medium text-gray-700">Testimonial 2</label>
+                        <input type="text" id="testimonial_2" name="testimonial_2" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
                     </div>
                 </div>
 
@@ -128,6 +118,8 @@
                         </div>
                         <button type="button" class="remove-director bg-red-500 text-white px-4 py-2 rounded-lg mt-4">Remove</button>
                     </div>
+               
+
                 </div>
                 <button type="button" id="add-director" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Add Another Director/Partner</button>
 
@@ -152,30 +144,25 @@
     </main>
 
     <script>
-        let directorIndex = 1;
+
+        document.querySelectorAll('.remove-director').forEach((btn) => {
+            btn.addEventListener('click', function () {
+                btn.closest('.director-row').remove();
+            });
+        });
 
         document.getElementById('add-director').addEventListener('click', function () {
             const container = document.getElementById('directors-container');
             const newDirector = document.querySelector('.director-row').cloneNode(true);
 
             newDirector.querySelectorAll('input, select').forEach((input) => {
-                input.name = input.name.replace(/\[\d+\]/, `[${directorIndex}]`);
                 input.value = '';
             });
 
-            newDirector.querySelector('h3').textContent = `Director/Partner ${directorIndex + 1}`;
+            container.appendChild(newDirector);
 
             newDirector.querySelector('.remove-director').addEventListener('click', function () {
                 newDirector.remove();
-            });
-
-            directorIndex++;
-            container.appendChild(newDirector);
-        });
-
-        document.querySelectorAll('.remove-director').forEach((btn) => {
-            btn.addEventListener('click', function () {
-                btn.closest('.director-row').remove();
             });
         });
     </script>

@@ -23,12 +23,17 @@ class OTPLoginController extends Controller
      */
     public function requestOTP(Request $request)
     {
-        $request->validate(['mobile_number' => 'required|numeric']);
+        $request->validate([
+            'mobile_number' => 'required|digits_between:10,15',
+        ]);
 
         $user = User::where('mobile_number', $request->mobile_number)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User with the provided mobile number does not exist.',
+            ], 404);
         }
 
         $otp = $this->otpService->generateOTP();
@@ -37,10 +42,20 @@ class OTPLoginController extends Controller
         $user->save();
 
         if ($this->otpService->sendOTP($user->mobile_number, $otp)) {
-            return response()->json(['message' => 'OTP sent successfully.']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'OTP has been sent successfully to the provided mobile number.',
+                'data' => [
+                    'mobile_number' => $request->mobile_number,
+                    'expires_in' => '10 minutes',
+                ],
+            ], 200);
         }
 
-        return response()->json(['message' => 'Failed to send OTP.'], 500);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unable to send OTP. Please try again later.',
+        ], 500);
     }
 
     /**
@@ -49,22 +64,31 @@ class OTPLoginController extends Controller
     public function verifyOTP(Request $request)
     {
         $request->validate([
-            'mobile_number' => 'required|numeric',
+            'mobile_number' => 'required|digits_between:10,15',
             'otp' => 'required|numeric',
         ]);
 
         $user = User::where('mobile_number', $request->mobile_number)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User with the provided mobile number does not exist.',
+            ], 404);
         }
 
-        if (Carbon::now()->greaterThan($user->otp_expires_at)) {
-            return response()->json(['message' => 'OTP has expired.'], 422);
+        if (!$user->otp_expires_at || Carbon::now()->greaterThan($user->otp_expires_at)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The OTP has expired. Please request a new one.',
+            ], 422);
         }
 
         if ($user->otp !== $request->otp) {
-            return response()->json(['message' => 'Invalid OTP.'], 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The provided OTP is incorrect.',
+            ], 422);
         }
 
         // Log the user in
@@ -73,17 +97,19 @@ class OTPLoginController extends Controller
         // Clear OTP after successful login
         $user->update(['otp' => null, 'otp_expires_at' => null]);
 
-        // Redirect based on user role
-        if ($user->role === 'admin') {
-            return response()->json([
-                'message' => 'Login successful.',
-                'redirect_url' => route('admin.dashboard'),
-            ]);
-        }
+        // Redirect based on user role with a fallback
+        $redirectUrl = (strtolower($user->role) === 'admin') 
+            ? route('admin.dashboard') 
+            : url('/home');
+
+        $redirectUrl = $redirectUrl ?: url('/');
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Login successful.',
-            'redirect_url' => url('/home'),
+            'data' => [
+                'redirect_url' => $redirectUrl,
+            ],
         ]);
     }
 }
