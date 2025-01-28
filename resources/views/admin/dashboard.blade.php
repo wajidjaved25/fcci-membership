@@ -60,6 +60,9 @@
                                     <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 focus:outline-none">
                                         Approve
                                     </button>
+<a href="{{ route('registrations.download-pdf', $registration->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">
+    Download PDF
+</a>
                                 </form>
                                 <form action="{{ route('admin.reject', $registration->id) }}" method="POST" class="inline-block">
                                     @csrf

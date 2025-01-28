@@ -29,6 +29,8 @@ Route::post('/login/verify-otp', [OTPLoginController::class, 'verifyOTP'])->name
 // Registration form routes
 Route::get('/register/{form}', [RegistrationController::class, 'showForm'])->name('register.show');
 Route::post('/register/{form}', [RegistrationController::class, 'submitForm'])->name('register.submit');
+Route::get('/registrations/{id}/download-pdf', [RegistrationController::class, 'downloadPDF'])->name('registrations.download-pdf');
+Route::get('/registration/download/{id}', [RegistrationController::class, 'downloadPDF'])->name('registration.download');
 
 Route::middleware(['auth'])->group(function () {
     // Workflow routes
@@ -44,4 +46,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/registrations/{id}', [AdminController::class, 'show'])->name('admin.show');
     Route::post('/admin/registrations/{id}/approve', [AdminController::class, 'approve'])->name('admin.approve');
     Route::post('/admin/registrations/{id}/reject', [AdminController::class, 'reject'])->name('admin.reject');
+
+
 });

@@ -41,7 +41,8 @@
                 @endforeach
             </div>
         @endif
-
+<h2>Actions</h2>
+<a href="{{ route('registration.download', $registration->id) }}" class="btn btn-primary">Download PDF</a>
         <!-- Uploaded Documents -->
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Uploaded Documents</h2>
         @if($registration->documents->isEmpty())

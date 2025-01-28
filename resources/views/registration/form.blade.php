@@ -25,45 +25,61 @@
             <form id="registration-form" action="{{ route('register.submit', $formDetails->name) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <!-- Company Details -->
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Company Details</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="company_name" class="block text-sm font-medium text-gray-700">Company Name</label>
-                        <input type="text" id="company_name" name="company_name" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                        <input type="text" id="address" name="address" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="telephone" class="block text-sm font-medium text-gray-700">Telephone</label>
-                        <input type="text" id="telephone" name="telephone" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
-                        <input type="text" id="mobile" name="mobile" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
-                        <input type="url" id="website" name="website" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="membership_class" class="block text-sm font-medium text-gray-700">Membership Class</label>
-                        <select id="membership_class" name="membership_class" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            <option value="Corporate">Corporate</option>
-                            <option value="Associate">Associate</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="year_establishment" class="block text-sm font-medium text-gray-700">Year of Establishment</label>
-                        <input type="number" id="year_establishment" name="year_establishment" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    </div>
-                </div>
+    <!-- Company Details -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Company Details</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+        <div>
+            <label for="company_name" class="block text-sm font-medium text-gray-700">Company Name</label>
+            <input type="text" id="company_name" name="company_name" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+            <input type="text" id="address" name="address" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="telephone" class="block text-sm font-medium text-gray-700">Telephone</label>
+            <input type="text" id="telephone" name="telephone" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
+            <input type="text" id="mobile" name="mobile" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+            <input type="url" id="website" name="website" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="membership_class" class="block text-sm font-medium text-gray-700">Membership Class</label>
+            <select id="membership_class" name="membership_class" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+                <option value="Corporate">Corporate</option>
+                <option value="Associate">Associate</option>
+            </select>
+        </div>
+        <div>
+            <label for="year_establishment" class="block text-sm font-medium text-gray-700">Year of Establishment</label>
+            <input type="number" id="year_establishment" name="year_establishment" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="ntn" class="block text-sm font-medium text-gray-700">NTN</label>
+            <input type="text" id="ntn" name="ntn" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="sales_tax_number" class="block text-sm font-medium text-gray-700">Sales Tax Number</label>
+            <input type="text" id="sales_tax_number" name="sales_tax_number" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+        <div>
+            <label for="main_business" class="block text-sm font-medium text-gray-700">Main Business</label>
+            <input type="text" id="main_business" name="main_business" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+        </div>
+        <div>
+            <label for="product_line" class="block text-sm font-medium text-gray-700">Product Line</label>
+            <input type="text" id="product_line" name="product_line" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+        </div>
+    </div>
 
                 <!-- Testimonial Details -->
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Testimonial Details</h2>

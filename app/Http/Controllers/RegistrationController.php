@@ -9,35 +9,29 @@ use App\Models\DocumentRequirement;
 use App\Models\RegistrationDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class RegistrationController extends Controller
 {
     /**
      * Show the registration form for the specified type.
-     *
-     * @param string $form
-     * @return \Illuminate\View\View
      */
     public function showForm($form)
     {
         $formDetails = RegistrationForm::where('name', $form)->firstOrFail();
         $documentRequirements = DocumentRequirement::where('form_id', $formDetails->id)->get();
 
-        return view('registration.form', [
-            'formDetails' => $formDetails,
-            'documentRequirements' => $documentRequirements,
-        ]);
+        return view('registration.form', compact('formDetails', 'documentRequirements'));
     }
 
     /**
      * Submit the registration form.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param string $form
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function submitForm(Request $request, $form)
-    {
+ public function submitForm(Request $request, $form)
+{
+    try {
         $formDetails = RegistrationForm::where('name', $form)->firstOrFail();
 
         // Validate the request
@@ -66,18 +60,23 @@ class RegistrationController extends Controller
             'documents.*' => 'file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        // Check if a user exists with the provided mobile or email
-        $user = User::firstOrCreate(
-            [
-                'mobile_number' => $validated['mobile'],
-                'email' => $validated['email'],
-            ],
-            [
+        // Check if the user already exists
+        $user = User::where('email', $validated['email'])
+                    ->orWhere('mobile_number', $validated['mobile'])
+                    ->first();
+
+        if (!$user) {
+            // Create a new user
+            $user = User::create([
                 'name' => $validated['company_name'],
-                'password' => bcrypt('temporary-password'), // Temporary password
+                'email' => $validated['email'],
+                'mobile_number' => $validated['mobile'],
+                'password' => bcrypt('temporary-password'),
                 'role' => 'pending',
-            ]
-        );
+            ]);
+        } else {
+            return back()->withInput()->withErrors(['email' => 'The email or mobile number is already registered. Please use different details or contact support.']);
+        }
 
         // Create the registration
         $registration = Registration::create([
@@ -118,81 +117,39 @@ class RegistrationController extends Controller
             }
         }
 
+        // Generate PDF
+        $pdf = Pdf::loadView('pdf.registration', compact('registration'));
+        $pdfPath = 'pdfs/registration_' . $registration->id . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+
+// Update the registration with the PDF path
+        $registration->update(['pdf_path' => $pdfPath]);
+
         return redirect()->route('home')->with('success', 'Registration submitted successfully.');
+    } catch (\Exception $e) {
+        Log::error('Error during registration submission: ' . $e->getMessage());
+        return back()->withInput()->withErrors(['error' => 'An unexpected error occurred. Please try again later.']);
     }
+}
 
     /**
-     * Workflow: Verify Documents
+     * Download the generated PDF.
      */
-    public function verifyDocuments($id)
-    {
-        $registration = Registration::findOrFail($id);
+    public function downloadPDF($id)
+{
+    $registration = Registration::findOrFail($id);
 
-        if (Auth::user()->role !== 'membership_supervisor') {
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-
-        $registration->update(['status' => 'fee_due']);
-        return redirect()->route('admin.dashboard')->with('success', 'Documents verified. Fee payment required.');
+    // Check if the logged-in user is the owner or an admin
+    if (Auth::user()->id !== $registration->user_id && Auth::user()->role !== 'admin') {
+        return redirect()->route('home')->with('error', 'You do not have permission to download this file.');
     }
 
-    /**
-     * Workflow: Collect Fee
-     */
-    public function collectFee($id)
-    {
-        $registration = Registration::findOrFail($id);
+    $pdfPath = $registration->pdf_path;
 
-        if (Auth::user()->role !== 'cashier') {
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-
-        $registration->update(['status' => 'fee_paid']);
-        return redirect()->route('admin.dashboard')->with('success', 'Fee collected successfully.');
+    if (Storage::disk('public')->exists($pdfPath)) {
+        return Storage::disk('public')->download($pdfPath);
     }
 
-    /**
-     * Workflow: Audit Documents
-     */
-    public function auditDocuments($id)
-    {
-        $registration = Registration::findOrFail($id);
-
-        if (Auth::user()->role !== 'accounts_audit') {
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-
-        $registration->update(['status' => 'provisionally_approved']);
-        return redirect()->route('admin.dashboard')->with('success', 'Documents audited successfully.');
-    }
-
-    /**
-     * Workflow: Approve Provisional Membership
-     */
-    public function approveProvisionalMembership($id)
-    {
-        $registration = Registration::findOrFail($id);
-
-        if (Auth::user()->role !== 'dg_secretary') {
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-
-        $registration->update(['status' => 'committee_review']);
-        return redirect()->route('admin.dashboard')->with('success', 'Provisional membership approved.');
-    }
-
-    /**
-     * Workflow: Grant Final Approval
-     */
-    public function grantFinalApproval($id)
-    {
-        $registration = Registration::findOrFail($id);
-
-        if (Auth::user()->role !== 'chairman_president') {
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-
-        $registration->update(['status' => 'final_approval']);
-        return redirect()->route('admin.dashboard')->with('success', 'Membership approved.');
+    return redirect()->back()->with('error', 'PDF not found.');
     }
 }
