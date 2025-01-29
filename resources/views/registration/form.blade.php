@@ -22,120 +22,97 @@
             <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Register for {{ $formDetails->name }}</h1>
             <p class="text-center text-gray-600 mb-8">{{ $formDetails->description }}</p>
 
+            <!-- Display Validation Errors -->
+            @if ($errors->any())
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+                    <strong>Whoops! There were some problems with your input.</strong>
+                    <ul class="mt-2">
+                        @foreach ($errors->all() as $error)
+                            <li class="text-sm">{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form id="registration-form" action="{{ route('register.submit', $formDetails->name) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-    <!-- Company Details -->
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Company Details</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-        <div>
-            <label for="company_name" class="block text-sm font-medium text-gray-700">Company Name</label>
-            <input type="text" id="company_name" name="company_name" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-            <input type="text" id="address" name="address" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label for="telephone" class="block text-sm font-medium text-gray-700">Telephone</label>
-            <input type="text" id="telephone" name="telephone" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
-            <input type="text" id="mobile" name="mobile" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
-            <input type="url" id="website" name="website" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="membership_class" class="block text-sm font-medium text-gray-700">Membership Class</label>
-            <select id="membership_class" name="membership_class" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                <option value="Corporate">Corporate</option>
-                <option value="Associate">Associate</option>
-            </select>
-        </div>
-        <div>
-            <label for="year_establishment" class="block text-sm font-medium text-gray-700">Year of Establishment</label>
-            <input type="number" id="year_establishment" name="year_establishment" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label for="ntn" class="block text-sm font-medium text-gray-700">NTN</label>
-            <input type="text" id="ntn" name="ntn" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="sales_tax_number" class="block text-sm font-medium text-gray-700">Sales Tax Number</label>
-            <input type="text" id="sales_tax_number" name="sales_tax_number" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-        <div>
-            <label for="main_business" class="block text-sm font-medium text-gray-700">Main Business</label>
-            <input type="text" id="main_business" name="main_business" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-        </div>
-        <div>
-            <label for="product_line" class="block text-sm font-medium text-gray-700">Product Line</label>
-            <input type="text" id="product_line" name="product_line" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-        </div>
-    </div>
+                <!-- Company Details -->
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Company Details</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    @foreach([
+                        'company_name' => 'Company Name', 
+                        'address' => 'Address', 
+                        'telephone' => 'Telephone', 
+                        'mobile' => 'Mobile', 
+                        'email' => 'Email', 
+                        'website' => 'Website'
+                    ] as $field => $label)
+                        <div>
+                            <label for="{{ $field }}" class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                            <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Membership & Business Details -->
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Membership & Business Details</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="membership_class" class="block text-sm font-medium text-gray-700">Membership Class</label>
+                        <select id="membership_class" name="membership_class" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+                            <option value="Corporate" {{ old('membership_class') == 'Corporate' ? 'selected' : '' }}>Corporate</option>
+                            <option value="Associate" {{ old('membership_class') == 'Associate' ? 'selected' : '' }}>Associate</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="year_establishment" class="block text-sm font-medium text-gray-700">Year of Establishment</label>
+                        <input type="number" id="year_establishment" name="year_establishment" value="{{ old('year_establishment') }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="ntn" class="block text-sm font-medium text-gray-700">NTN</label>
+                        <input type="text" id="ntn" name="ntn" value="{{ old('ntn') }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="sales_tax_number" class="block text-sm font-medium text-gray-700">Sales Tax Number</label>
+                        <input type="text" id="sales_tax_number" name="sales_tax_number" value="{{ old('sales_tax_number') }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="main_business" class="block text-sm font-medium text-gray-700">Main Business</label>
+                        <input type="text" id="main_business" name="main_business" value="{{ old('main_business') }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="product_line" class="block text-sm font-medium text-gray-700">Product Line</label>
+                        <input type="text" id="product_line" name="product_line" value="{{ old('product_line') }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                    </div>
+                </div>
 
                 <!-- Testimonial Details -->
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Testimonial Details</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="testimonial_1" class="block text-sm font-medium text-gray-700">Testimonial 1</label>
-                        <input type="text" id="testimonial_1" name="testimonial_1" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="testimonial_2" class="block text-sm font-medium text-gray-700">Testimonial 2</label>
-                        <input type="text" id="testimonial_2" name="testimonial_2" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                    </div>
+                    @foreach(['testimonial_1' => 'Testimonial 1', 'testimonial_2' => 'Testimonial 2'] as $field => $label)
+                        <div>
+                            <label for="{{ $field }}" class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                            <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
+                        </div>
+                    @endforeach
                 </div>
 
-                <!-- Directors/Partners Details -->
+                <!-- Proprietor/Directors/Partners Details -->
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Proprietor/Directors/Partners Details</h2>
                 <div id="directors-container">
                     <div class="director-row bg-gray-100 p-4 rounded-lg mb-4">
-                        <h3 class="text-lg font-bold text-gray-700 mb-4">Proprietor/Director/Partner 1</h3>
+                        <h3 class="text-lg font-bold text-gray-700 mb-4">Proprietor/Director/Partner</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div>
-                                <label for="directors[0][name]" class="block text-sm font-medium text-gray-700">Name</label>
-                                <input type="text" name="directors[0][name]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="directors[0][cnic_number]" class="block text-sm font-medium text-gray-700">CNIC Number</label>
-                                <input type="text" name="directors[0][cnic_number]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="directors[0][relation]" class="block text-sm font-medium text-gray-700">Son of/ Daughter of / Wife of</label>
-                                <input type="text" name="directors[0][relation]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="directors[0][date_of_birth]" class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                                <input type="date" name="directors[0][date_of_birth]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="directors[0][gender]" class="block text-sm font-medium text-gray-700">Gender</label>
-                                <select name="directors[0][gender]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="directors[0][home_address]" class="block text-sm font-medium text-gray-700">Home Address</label>
-                                <input type="text" name="directors[0][home_address]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                            </div>
-                            <div>
-                                <label for="directors[0][phone]" class="block text-sm font-medium text-gray-700">Phone</label>
-                                <input type="text" name="directors[0][phone]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
-                            </div>
+                            @foreach(['name' => 'Name', 'cnic_number' => 'CNIC Number', 'relation' => 'Son of / Daughter of / Wife of', 'date_of_birth' => 'Date of Birth', 'gender' => 'Gender', 'home_address' => 'Home Address', 'phone' => 'Phone'] as $field => $label)
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">{{ $label }}</label>
+                                    <input type="text" name="directors[0][{{ $field }}]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
+                                </div>
+                            @endforeach
                         </div>
                         <button type="button" class="remove-director bg-red-500 text-white px-4 py-2 rounded-lg mt-4">Remove</button>
                     </div>
-               
-
                 </div>
                 <button type="button" id="add-director" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Add Another Director/Partner</button>
 
@@ -145,7 +122,6 @@
                 <div class="mb-4">
                     <label for="documents[{{ $index }}]" class="block text-sm font-medium text-gray-700">{{ $document->document_name }}</label>
                     <input type="file" name="documents[{{ $index }}]" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500" required>
-                    <input type="hidden" name="document_names[{{ $index }}]" value="{{ $document->document_name }}">
                 </div>
                 @endforeach
 
@@ -160,26 +136,17 @@
     </main>
 
     <script>
-
-        document.querySelectorAll('.remove-director').forEach((btn) => {
-            btn.addEventListener('click', function () {
-                btn.closest('.director-row').remove();
-            });
-        });
-
         document.getElementById('add-director').addEventListener('click', function () {
             const container = document.getElementById('directors-container');
             const newDirector = document.querySelector('.director-row').cloneNode(true);
-
-            newDirector.querySelectorAll('input, select').forEach((input) => {
-                input.value = '';
-            });
-
+            newDirector.querySelectorAll('input').forEach(input => input.value = '');
             container.appendChild(newDirector);
+        });
 
-            newDirector.querySelector('.remove-director').addEventListener('click', function () {
-                newDirector.remove();
-            });
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-director')) {
+                e.target.closest('.director-row').remove();
+            }
         });
     </script>
 </body>

@@ -114,10 +114,13 @@ class RegistrationController extends Controller
             Storage::disk('public')->put($pdfPath, $pdf->output());
 
             return redirect()->route('home')->with('success', 'Registration submitted successfully.');
-        } catch (\Exception $e) {
-            Log::error('Error during registration submission: ' . $e->getMessage());
-            return back()->withErrors('An error occurred while submitting the registration form. Please try again.');
-        }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+        // Return back with errors
+        return redirect()->back()->withErrors($e->validator)->withInput();
+    } catch (\Exception $e) {
+        Log::error('Error during registration submission: ' . $e->getMessage());
+        return redirect()->back()->withErrors('An error occurred while submitting the registration form. Please try again.');
+    }
     }
 
     /**
