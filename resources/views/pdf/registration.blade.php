@@ -4,35 +4,119 @@
     <meta charset="UTF-8">
     <title>Membership Registration</title>
     <style>
+        /* Base Styling */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
         }
+
+        /* Header Styling */
         header {
             text-align: center;
-            margin-bottom: 20px;
+            padding: 30px 0;
+            background-color: #004080;
+            color: white;
+            margin-bottom: 40px;
+            border-bottom: 5px solid #003366;
         }
+
+        header img {
+            max-width: 120px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 10px 0 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Details Section */
         .details {
-            margin-top: 20px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px;
         }
+
+        /* Section Headings */
+        .details h2 {
+            font-size: 1.8rem;
+            color: #004080;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #004080;
+        }
+
+        /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
         }
+
         th, td {
-            padding: 10px;
+            padding: 14px 16px;
             text-align: left;
-            border: 1px solid #ddd;
+            font-size: 1rem;
         }
-        .logo {
-            max-width: 150px;
+
+        th {
+            background-color: #004080;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        /* Table Row Striping and Hover */
+        tbody tr:nth-child(odd) td {
+            background-color: #ffffff;
+        }
+
+        tbody tr:hover td {
+            background-color: #eaf3ff;
+        }
+
+        /* No Border Table */
+        th, td {
+            border: none;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .details {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .details h2 {
+                font-size: 1.5rem;
+            }
+
+            table th, table td {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <img src="{{ public_path('images/fcci-logo.png') }}" alt="FCCI Logo" class="logo">
-        <h1>Membership Registration</h1>
+        <img src="{{ public_path('images/fcci-logo.png') }}" alt="FCCI Logo">
+        <h1>Membership Registration Application</h1>
     </header>
     <div class="details">
         <h2>Company Details</h2>
@@ -89,12 +173,18 @@
 
         <h2>Uploaded Documents</h2>
         <table>
-            @foreach ($registration->documents as $document)
+            <thead>
                 <tr>
-                    <td>{{ $document->document_type }}</td>
-                    <td><a href="{{ public_path('storage/' . $document->document_path) }}" target="_blank">Download</a></td>
+                    <th>Document Type</th>
                 </tr>
-            @endforeach
+            </thead>
+            <tbody>
+                @foreach ($registration->documents as $document)
+                    <tr>
+                        <td>{{ $document->document_type }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
     </div>
 </body>

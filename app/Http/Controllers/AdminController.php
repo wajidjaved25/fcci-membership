@@ -112,4 +112,15 @@ class AdminController extends Controller
 
         return redirect()->route('admin.dashboard')->with('success', 'Registration rejected successfully.');
     }
+public function downloadPDF($id)
+{
+    $registration = Registration::findOrFail($id);
+    $pdfPath = 'pdfs/registration_' . $registration->id . '.pdf';
+
+    if (Storage::disk('public')->exists($pdfPath)) {
+        return response()->download(storage_path('app/public/' . $pdfPath));
+    }
+
+    return redirect()->back()->with('error', 'PDF not found.');
+}
 }

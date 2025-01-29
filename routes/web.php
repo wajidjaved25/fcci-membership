@@ -11,13 +11,25 @@ use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\SecretaryController;
 use App\Http\Controllers\ChairmanController;
 
-// Home route
+// Home route (Redirects based on role)
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/home', function () {
-    return redirect()->route('admin.dashboard'); // Change this to match your default role-based route
+    if (Auth::check()) {
+        $role = Auth::user()->role;
+        return match ($role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'membership_supervisor' => redirect()->route('supervisor.dashboard'),
+            'cashier' => redirect()->route('cashier.dashboard'),
+            'accounts_audit' => redirect()->route('accounts.dashboard'),
+            'dg_secretary' => redirect()->route('secretary.dashboard'),
+            'chairman_president' => redirect()->route('chairman.dashboard'),
+            default => redirect('/'),
+        };
+    }
+    return redirect('/');
 })->name('home');
 
 // Authentication routes
@@ -56,10 +68,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/registrations/{id}/reject', [AdminController::class, 'reject'])->name('admin.reject');
 
     // Role-based dashboards
-        Route::get('/supervisor/dashboard', [MembershipSupervisorController::class, 'index'])->name('supervisor.dashboard');
-        Route::get('/cashier/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-        Route::get('/accounts/dashboard', [AccountsController::class, 'index'])->name('accounts.dashboard');
-        Route::get('/secretary/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
-        Route::get('/chairman/dashboard', [ChairmanController::class, 'index'])->name('chairman.dashboard');
+    Route::get('/supervisor/dashboard', [MembershipSupervisorController::class, 'index'])->name('supervisor.dashboard');
+    Route::get('/cashier/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
+    Route::get('/accounts/dashboard', [AccountsController::class, 'index'])->name('accounts.dashboard');
+    Route::get('/secretary/dashboard', [SecretaryController::class, 'index'])->name('secretary.dashboard');
+    Route::get('/chairman/dashboard', [ChairmanController::class, 'index'])->name('chairman.dashboard');
+
+    // Show routes for detailed registration view for each role
+    Route::get('/supervisor/registrations/{id}', [MembershipSupervisorController::class, 'show'])->name('supervisor.show');
+    Route::get('/cashier/registrations/{id}', [CashierController::class, 'show'])->name('cashier.show');
+    Route::get('/accounts/registrations/{id}', [AccountsController::class, 'show'])->name('accounts.show');
+    Route::get('/secretary/registrations/{id}', [SecretaryController::class, 'show'])->name('secretary.show');
+    Route::get('/chairman/registrations/{id}', [ChairmanController::class, 'show'])->name('chairman.show');
+
+    Route::post('/registrations/{id}/verify-documents', [RegistrationController::class, 'verifyDocuments'])
+        ->name('registrations.verify');
 
 });
