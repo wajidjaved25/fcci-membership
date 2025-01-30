@@ -82,59 +82,72 @@ class OTPLoginController extends Controller
             $user = User::where('mobile_number', $request->mobile_number)->first();
 
             if (!$user) {
-                Log::warning('OTP Verification Failed: No user found for ' . $request->mobile_number);
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No user found with the provided mobile number.',
                 ], 404);
             }
 
-            if (!$user->otp_expires_at || Carbon::now()->greaterThan($user->otp_expires_at)) {
-                Log::warning("OTP Expired: OTP expired for {$user->mobile_number}");
+            // Use fixed OTP only in local environment
+            $fixedOtp = '123456';
+            $isLocal = app()->environment('local');
+
+            if ($isLocal && $request->otp == $fixedOtp) {
+                // Allow login with fixed OTP
+                Auth::login($user);
+                $user->update(['otp' => null, 'otp_expires_at' => null]);
+
+                $redirectUrl = $this->getRedirectUrl($user);
+                Log::info("User Login (Test Mode): {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Login successful (Test Mode).',
+                    'data' => ['redirect_url' => $redirectUrl],
+                ]);
+            }
+
+            // Normal OTP verification
+            if (!$user->otp_expires_at || Carbon::now()->greaterThan($user->otp_expires_at) || $user->otp !== $request->otp) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'The OTP has expired. Please request a new one.',
+                    'message' => 'Invalid or expired OTP.',
                 ], 422);
             }
 
-            if ($user->otp !== $request->otp) {
-                Log::warning("Invalid OTP: Entered OTP {$request->otp} does not match for {$user->mobile_number}");
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'The provided OTP is incorrect.',
-                ], 422);
-            }
-
-            // Log the user in
+            // Login the user
             Auth::login($user);
-
-            // Clear OTP after successful login
             $user->update(['otp' => null, 'otp_expires_at' => null]);
 
-            // Redirect based on role with fallback to the home page
-            $redirectUrl = match (strtolower($user->role)) {
-                'admin' => route('admin.dashboard'),
-                'membership_supervisor' => route('supervisor.dashboard'),
-                'cashier' => route('cashier.dashboard'),
-                'accounts_audit' => route('accounts.dashboard'),
-                'dg_secretary' => route('secretary.dashboard'),
-                'chairman_president' => route('chairman.dashboard'),
-                default => route('admin.dashboard'), // Fallback instead of 'home'
-            };
-
+            $redirectUrl = $this->getRedirectUrl($user);
             Log::info("User Login: {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Login successful.',
-                'data' => [
-                    'redirect_url' => $redirectUrl,
-                ],
+                'data' => ['redirect_url' => $redirectUrl],
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error in OTP Verification: ' . $e->getMessage());
             return response()->json(['message' => 'An error occurred. Please try again later.'], 500);
         }
+    }
+
+    /**
+     * Get redirect URL based on user role.
+     */
+    private function getRedirectUrl($user)
+    {
+        $roleRedirects = [
+            'admin' => route('admin.dashboard'),
+            'membership_supervisor' => route('supervisor.dashboard'),
+            'cashier' => route('cashier.dashboard'),
+            'accounts_audit' => route('accounts.dashboard'),
+            'dg_secretary' => route('secretary.dashboard'),
+            'chairman_president' => route('chairman.dashboard'),
+        ];
+
+        return $roleRedirects[strtolower($user->role)] ?? url('/home');
     }
 }

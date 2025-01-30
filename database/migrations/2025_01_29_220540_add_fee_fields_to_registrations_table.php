@@ -4,21 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddStatusToRegistrationsTable extends Migration
+class AddFeeFieldsToRegistrationsTable extends Migration
 {
     public function up()
     {
         Schema::table('registrations', function (Blueprint $table) {
-            $table->string('status')->default('pending'); // 'pending', 'fee_due', 'fee_paid', 'provisionally_approved', 'final_approval'
-            $table->text('rejection_reason')->nullable();
+            $table->decimal('fee_paid', 10, 2)->nullable();
+            $table->timestamp('fee_paid_at')->nullable();
+            $table->string('payment_status')->default('pending'); // pending, paid
         });
     }
 
     public function down()
     {
         Schema::table('registrations', function (Blueprint $table) {
-            $table->dropColumn(['status', 'rejection_reason']);
+            $table->dropColumn(['fee_paid', 'fee_paid_at', 'payment_status']);
         });
     }
 }
-

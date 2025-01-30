@@ -45,4 +45,8 @@ class Registration extends Model
     {
         return $this->hasMany(RegistrationDocument::class, 'registration_id');
     }
+public function membershipFee()
+{
+    return $this->hasOne(MembershipFee::class, 'membership_class', 'membership_class');
+}
 }
