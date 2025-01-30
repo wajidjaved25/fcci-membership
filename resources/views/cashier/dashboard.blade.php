@@ -24,21 +24,27 @@
                     </thead>
                     <tbody>
                         @foreach($registrations as $registration)
-                        <tr class="text-center">
-                            <td class="border border-gray-300 px-4 py-2">{{ $registration->id }}</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ $registration->company_name }}</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ $registration->membership_class }}</td>
-                            <td class="border border-gray-300 px-4 py-2">Rs. {{ $registration->fee_paid ?? 'N/A' }}</td>
-                            <td class="border border-gray-300 px-4 py-2">{{ ucfirst($registration->payment_status) }}</td>
-                            <td class="border border-gray-300 px-4 py-2">
-                                <form action="{{ route('cashier.collect-fee', $registration->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                        Collect Fee
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
+                            @if($registration->payment_status === 'pending') 
+                            <tr class="text-center">
+                                <td class="border border-gray-300 px-4 py-2">{{ $registration->id }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ $registration->company_name }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ $registration->membership_class }}</td>
+                                <td class="border border-gray-300 px-4 py-2">Rs. {{ $registration->fee_amount }}</td>
+                                <td class="border border-gray-300 px-4 py-2">{{ ucfirst($registration->payment_status) }}</td>
+                                <td class="border border-gray-300 px-4 py-2">
+                                    <form action="{{ route('cashier.collect-fee', $registration->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                            Collect Fee
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('cashier.print-receipt', $registration->id) }}" 
+                                       class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                                        Print Receipt
+                                    </a>
+                                </td>
+                            </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

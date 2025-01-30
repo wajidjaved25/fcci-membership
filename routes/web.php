@@ -86,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
 
 //Fee colection route
     Route::get('/cashier/dashboard', [CashierController::class, 'index'])->name('cashier.dashboard');
-Route::post('/cashier/collect-fee/{id}', [CashierController::class, 'collectFee'])->name('cashier.collect-fee');
-    Route::get('/cashier/generate-receipt/{id}', [CashierController::class, 'generateReceipt'])->name('cashier.generateReceipt');
+    Route::post('/cashier/collect-fee/{id}', [CashierController::class, 'collectFee'])->name('cashier.collect-fee');
+    Route::get('/cashier/print-receipt/{id}', [CashierController::class, 'printReceipt'])->name('cashier.print-receipt');
 
 });
