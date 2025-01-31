@@ -125,11 +125,11 @@ if ($request->has('directors')) {
 
         if ($request->hasFile("directors.$index.cnic_front")) {
             $directorData['cnic_front'] = $request->file("directors.$index.cnic_front")
-                ->store('private/documents'); // ✅ Save inside correct path
+                ->store('public/documents'); // ✅ Save inside correct path
         }
         if ($request->hasFile("directors.$index.cnic_back")) {
             $directorData['cnic_back'] = $request->file("directors.$index.cnic_back")
-                ->store('private/documents'); // ✅ Save inside correct path
+                ->store('public/documents'); // ✅ Save inside correct path
         }
 
         // ✅ Store director data in the database
@@ -142,7 +142,7 @@ if ($request->has('directors')) {
                 foreach ($request->file('documents') as $index => $file) {
                     $documentName = $request->input("document_names.$index") ?? 'Unknown Document';
 
-                    $path = $file->store('documents');
+                    $path = $file->store('public/documents');
                     RegistrationDocument::create([
                         'registration_id' => $registration->id,
                         'document_type' => $request->input("document_names.$index"),
