@@ -28,10 +28,11 @@ class Registration extends Model
         'product_line',
         'status',
         'rejection_reason',
-	'fee_paid',
-	'fee_paid_at',
-	'payment_status',
-	'fee_amount',
+	    'fee_paid',
+	    'fee_paid_at',
+	    'payment_status',
+	    'fee_amount',
+        'rejected_by',
     ];
 
     /**
@@ -52,5 +53,9 @@ class Registration extends Model
 public function membershipFee()
 {
     return $this->hasOne(MembershipFee::class, 'membership_class', 'membership_class');
+}
+public function rejectedBy()
+{
+    return $this->belongsTo(User::class, 'rejected_by');
 }
 }

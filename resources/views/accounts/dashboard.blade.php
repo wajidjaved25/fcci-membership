@@ -27,7 +27,7 @@
                             <td class="border border-gray-300 px-4 py-2">{{ $registration->id }}</td>
                             <td class="border border-gray-300 px-4 py-2">{{ $registration->company_name }}</td>
                             <td class="border border-gray-300 px-4 py-2">{{ ucfirst($registration->status) }}</td>
-                            <td class="border border-gray-300 px-4 py-2">Rs. {{ number_format($registration->fee_paid, 2) }}</td>
+                            <td class="border border-gray-300 px-4 py-2">Rs. {{ number_format($registration->fee_amount, 2) }}</td>
                             <td class="border border-gray-300 px-4 py-2">
                                 <a href="{{ route('accounts.show', $registration->id) }}" 
                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">

@@ -17,7 +17,7 @@ class SecretaryController extends Controller
             return redirect()->route('home')->with('error', 'Unauthorized access.');
         }
 
-        $registrations = Registration::where('status', 'provisionally_approved')->get();
+        $registrations = Registration::where('status', 'audited')->get();
         return view('secretary.dashboard', compact('registrations'));
     }
 

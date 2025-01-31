@@ -39,30 +39,34 @@
                 <div class="mt-2">
                     @if (!empty($director->cnic_front))
                         <p><strong>CNIC Front:</strong> 
-                            <a href="{{ route('documents.view', ['filename' => basename($director->cnic_front)]) }}" 
-                            target="_blank" class="text-blue-500 underline">View CNIC Front</a>
+                        <a href="{{ asset('storage/' . $director->cnic_front) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Front
+</a>
+
                         </p>
                     @endif
 
                     @if (!empty($director->cnic_back))
                         <p><strong>CNIC Back:</strong> 
-                            <a href="{{ route('documents.view', ['filename' => basename($director->cnic_back)]) }}" 
-                            target="_blank" class="text-blue-500 underline">View CNIC Back</a>
+                        <a href="{{ asset('storage/' . $director->cnic_back) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Back
+</a>
                         </p>
                     @endif
                 </div>
             </div>
-  @endforeach<!-- ✅ This is the correct place for-->
+        @endforeach  <!-- ✅ Closed loop -->
 
         <!-- Uploaded Documents -->
         <h2 class="text-xl font-bold text-gray-700 mt-6 mb-4">Uploaded Documents</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @foreach($registration->documents as $document)
-                <p><strong>{{ $document->document_type }}:</strong> 
-                    <a href="{{ route('documents.view', ['filename' => basename($document->document_path)]) }}" target="_blank">
-   View Document
-</a>                </p>
-            @endforeach
+        @foreach($registration->documents as $document)
+    <p><strong>{{ $document->document_type }}:</strong> 
+        <a href="{{ asset('storage/' . $document->document_path) }}" target="_blank" class="text-blue-500 underline">
+            View Document
+        </a>
+    </p>
+@endforeach
         </div>
 
         <!-- Verification Button -->
@@ -72,6 +76,41 @@
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Verify Documents
                 </button>
+                <!-- Reject Button (Opens Modal) -->
+<button onclick="document.getElementById('rejectModal').style.display='block'"
+        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+    Reject Application
+</button>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Reject Application</h2>
+        <form action="{{ route('supervisor.reject', $registration->id) }}" method="POST">
+            @csrf
+            <label for="rejection_reason" class="block text-sm font-medium text-gray-700">Rejection Reason:</label>
+            <textarea name="rejection_reason" id="rejection_reason" required
+                      class="w-full border rounded-lg p-2 mt-2"></textarea>
+
+            <div class="flex justify-end mt-4">
+                <button type="button" onclick="document.getElementById('rejectModal').style.display='none'"
+                        class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 ml-2">
+                    Confirm Rejection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@if($registration->status === 'rejected')
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4">
+        <strong>Rejected:</strong> {{ $registration->rejection_reason }}<br>
+        <strong>Rejected By:</strong> {{ $registration->rejectedBy->name ?? 'Unknown' }}
+    </div>
+@endif
             </form>
         </div>
     </div>

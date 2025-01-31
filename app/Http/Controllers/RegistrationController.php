@@ -125,11 +125,11 @@ if ($request->has('directors')) {
 
         if ($request->hasFile("directors.$index.cnic_front")) {
             $directorData['cnic_front'] = $request->file("directors.$index.cnic_front")
-                ->store('public/documents'); // ✅ Save inside correct path
+                ->store('documents', 'public'); // ✅ Store in 'storage/app/public/documents'
         }
         if ($request->hasFile("directors.$index.cnic_back")) {
             $directorData['cnic_back'] = $request->file("directors.$index.cnic_back")
-                ->store('public/documents'); // ✅ Save inside correct path
+                ->store('documents', 'public'); // ✅ Store in 'storage/app/public/documents'
         }
 
         // ✅ Store director data in the database
@@ -137,19 +137,21 @@ if ($request->has('directors')) {
     }
 }
 
-            // Save Uploaded Documents
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $index => $file) {
-                    $documentName = $request->input("document_names.$index") ?? 'Unknown Document';
+// Save Uploaded Documents
+if ($request->hasFile('documents')) {
+    foreach ($request->file('documents') as $index => $file) {
+        $documentName = $request->input("document_names.$index") ?? 'Unknown Document';
 
-                    $path = $file->store('public/documents');
-                    RegistrationDocument::create([
-                        'registration_id' => $registration->id,
-                        'document_type' => $request->input("document_names.$index"),
-                        'document_path' => $path,
-                    ]);
-                }
-            }
+        $path = $file->store('documents', 'public'); // ✅ Correct storage path
+
+        RegistrationDocument::create([
+            'registration_id' => $registration->id,
+            'document_type' => $documentName,
+            'document_path' => $path, // ✅ Store only 'documents/filename.pdf'
+        ]);
+    }
+}
+
 
             // Generate PDF
             $pdf = Pdf::loadView('pdf.registration', compact('registration'));

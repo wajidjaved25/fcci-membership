@@ -1,109 +1,82 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-10">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Registration Details</h1>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-center text-3xl font-bold text-gray-800">Application Details</h1>
 
+    <div class="bg-white p-6 rounded-lg shadow mt-6">
         <!-- Company Information -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Company Information</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-            <div>
-                <p><strong>Company Name:</strong> {{ $registration->company_name }}</p>
-                <p><strong>Address:</strong> {{ $registration->address }}</p>
-                <p><strong>Mobile:</strong> {{ $registration->mobile }}</p>
-                <p><strong>Email:</strong> {{ $registration->email }}</p>
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Company Information</h2>
+        <p><strong>Company Name:</strong> {{ $registration->company_name }}</p>
+        <p><strong>Address:</strong> {{ $registration->address }}</p>
+        <p><strong>Mobile:</strong> {{ $registration->mobile }}</p>
+        <p><strong>Email:</strong> {{ $registration->email }}</p>
+        <p><strong>Website:</strong> {{ $registration->website }}</p>
+        <p><strong>Membership Class:</strong> {{ $registration->membership_class }}</p>
+        <p><strong>Year of Establishment:</strong> {{ $registration->year_establishment }}</p>
+        <p><strong>NTN:</strong> {{ $registration->ntn }}</p>
+        <p><strong>Sales Tax Number:</strong> {{ $registration->sales_tax_number }}</p>
+        <p><strong>Main Business:</strong> {{ $registration->main_business }}</p>
+        <p><strong>Product Line:</strong> {{ $registration->product_line }}</p>
+        <p><strong>Testimonial 1:</strong> {{ $registration->testimonial_1 }}</p>
+        <p><strong>Testimonial 2:</strong> {{ $registration->testimonial_2 }}</p>
+
+        <!-- Directors/Partners Information -->
+        <h2 class="text-xl font-bold text-gray-700 mt-6 mb-4">Proprietor/Directors/Partners Details</h2>
+        @foreach($registration->directorsPartners as $director)
+            <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-sm">
+                <p><strong>Name:</strong> {{ $director->name }}</p>
+                <p><strong>CNIC:</strong> {{ $director->cnic_number }}</p>
+                <p><strong>Relation:</strong> {{ $director->relation }}</p>
+                <p><strong>Date of Birth:</strong> {{ $director->date_of_birth }}</p>
+                <p><strong>CNIC Issue Date:</strong> {{ $director->cnic_issue_date }}</p>
+                <p><strong>CNIC Expiry Date:</strong> {{ $director->cnic_expiry_date }}</p>
+                <p><strong>Gender:</strong> {{ ucfirst($director->gender) }}</p>
+                <p><strong>Home Address:</strong> {{ $director->home_address }}</p>
+                <p><strong>Phone:</strong> {{ $director->phone }}</p>
+                        
+                <!-- CNIC Document Links -->
+                <div class="mt-2">
+                    @if (!empty($director->cnic_front))
+                        <p><strong>CNIC Front:</strong> 
+                        <a href="{{ asset('storage/' . $director->cnic_front) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Front
+</a>
+
+                        </p>
+                    @endif
+
+                    @if (!empty($director->cnic_back))
+                        <p><strong>CNIC Back:</strong> 
+                        <a href="{{ asset('storage/' . $director->cnic_back) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Back
+</a>
+                        </p>
+                    @endif
+                </div>
             </div>
-            <div>
-                <p><strong>Telephone:</strong> {{ $registration->telephone ?? 'N/A' }}</p>
-                <p><strong>Website:</strong> <a href="{{ $registration->website }}" target="_blank" class="text-blue-500 hover:underline">{{ $registration->website ?? 'N/A' }}</a></p>
-                <p><strong>Membership Class:</strong> {{ $registration->membership_class }}</p>
-                <p><strong>Year of Establishment:</strong> {{ $registration->year_establishment }}</p>
-            </div>
+        @endforeach  <!-- ✅ Closed loop -->
+
+        <!-- Uploaded Documents -->
+        <h2 class="text-xl font-bold text-gray-700 mt-6 mb-4">Uploaded Documents</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @foreach($registration->documents as $document)
+    <p><strong>{{ $document->document_type }}:</strong> 
+        <a href="{{ asset('storage/' . $document->document_path) }}" target="_blank" class="text-blue-500 underline">
+            View Document
+        </a>
+    </p>
+@endforeach
         </div>
 
-        <!-- Directors/Partners -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Directors/Partners</h2>
-        @if($registration->directorsPartners->isEmpty())
-            <p>No directors or partners added.</p>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                @foreach ($registration->directorsPartners as $director)
-                    <div class="bg-gray-100 p-4 rounded-lg shadow">
-                        <p><strong>Name:</strong> {{ $director->name }}</p>
-                        <p><strong>Relation:</strong> {{ $director->relation }}</p>
-                        <p><strong>CNIC:</strong> {{ $director->cnic_number }}</p>
-                        <p><strong>Date of Birth:</strong> {{ $director->date_of_birth }}</p>
-                        <p><strong>Gender:</strong> {{ ucfirst($director->gender) }}</p>
-                        <p><strong>Home Address:</strong> {{ $director->home_address }}</p>
-                        <p><strong>Phone:</strong> {{ $director->phone ?? 'N/A' }}</p>
-			 <p><strong>CNIC Issue Date:</strong> {{ $director->cnic_issue_date }}</p>
-    <p><strong>CNIC Expiry Date:</strong> {{ $director->cnic_expiry_date }}</p>
-    <p><strong>CNIC Front:</strong> <a href="{{ asset('storage/' . $director->cnic_front) }}" target="_blank">View CNIC Front</a></p>
-    <p><strong>CNIC Back:</strong> <a href="{{ asset('storage/' . $director->cnic_back) }}" target="_blank">View CNIC Back</a></p>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-<h2>Actions</h2>
-<a href="{{ route('registration.download', $registration->id) }}" class="btn btn-primary">Download PDF</a>
-        <!-- Uploaded Documents -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Uploaded Documents</h2>
-        @if($registration->documents->isEmpty())
-            <p>No documents uploaded.</p>
-        @else
-            <ul class="list-disc pl-6 mb-6">
-                @foreach ($registration->documents as $document)
-                    <li>
-                        <strong>{{ $document->document_type }}:</strong> 
-                        <a href="{{ asset('storage/' . $document->document_path) }}" target="_blank" class="text-blue-500 hover:underline">View Document</a>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-
-        <!-- Role-Based Actions -->
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Actions</h2>
-        <div class="space-y-4">
-            <!-- Membership Supervisor: Verify Documents -->
-            @if($registration->status === 'pending' && Auth::user()->role === 'membership_supervisor')
+        <!-- Verification Button -->
+        <div class="mt-6 text-center">
             <form action="{{ route('registrations.verify', $registration->id) }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full px-4 py-2 bg-blue-500 text-white font-bold rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Verify Documents</button>
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    Verify Documents
+                </button>
             </form>
-            @endif
-
-            <!-- Cashier: Collect Fee -->
-            @if($registration->status === 'fee_due' && Auth::user()->role === 'cashier')
-            <form action="{{ route('registrations.fee', $registration->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="w-full px-4 py-2 bg-green-500 text-white font-bold rounded-lg shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">Collect Fee</button>
-            </form>
-            @endif
-
-            <!-- Accounts/Audit: Audit Documents -->
-            @if($registration->status === 'fee_paid' && Auth::user()->role === 'accounts_audit')
-            <form action="{{ route('registrations.audit', $registration->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="w-full px-4 py-2 bg-yellow-500 text-white font-bold rounded-lg shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">Audit Documents</button>
-            </form>
-            @endif
-
-            <!-- DG/Secretary: Approve Provisional Membership -->
-            @if($registration->status === 'provisionally_approved' && Auth::user()->role === 'dg_secretary')
-            <form action="{{ route('registrations.provisional', $registration->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="w-full px-4 py-2 bg-teal-500 text-white font-bold rounded-lg shadow hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500">Approve Provisional Membership</button>
-            </form>
-            @endif
-
-            <!-- Chairman/President: Grant Final Approval -->
-            @if($registration->status === 'committee_review' && Auth::user()->role === 'chairman_president')
-            <form action="{{ route('registrations.final', $registration->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="w-full px-4 py-2 bg-purple-500 text-white font-bold rounded-lg shadow hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500">Grant Final Approval</button>
-            </form>
-            @endif
         </div>
     </div>
 </div>

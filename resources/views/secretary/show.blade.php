@@ -34,40 +34,49 @@
                 <p><strong>Gender:</strong> {{ ucfirst($director->gender) }}</p>
                 <p><strong>Home Address:</strong> {{ $director->home_address }}</p>
                 <p><strong>Phone:</strong> {{ $director->phone }}</p>
-                
+                        
                 <!-- CNIC Document Links -->
                 <div class="mt-2">
-                    <p><strong>CNIC Front:</strong> 
-                        <a href="{{ route('documents.view', ['filename' => basename($director->cnic_front)]) }}" 
-                           target="_blank" class="text-blue-500 underline">View CNIC Front</a>
-                    </p>
-                    <p><strong>CNIC Back:</strong> 
-                        <a href="{{ route('documents.view', ['filename' => basename($director->cnic_back)]) }}" 
-                           target="_blank" class="text-blue-500 underline">View CNIC Back</a>
-                    </p>
+                    @if (!empty($director->cnic_front))
+                        <p><strong>CNIC Front:</strong> 
+                        <a href="{{ asset('storage/' . $director->cnic_front) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Front
+</a>
+
+                        </p>
+                    @endif
+
+                    @if (!empty($director->cnic_back))
+                        <p><strong>CNIC Back:</strong> 
+                        <a href="{{ asset('storage/' . $director->cnic_back) }}" target="_blank" class="text-blue-500 underline">
+    View CNIC Back
+</a>
+                        </p>
+                    @endif
                 </div>
             </div>
-        @endforeach
+        @endforeach  <!-- ✅ Closed loop -->
 
         <!-- Uploaded Documents -->
         <h2 class="text-xl font-bold text-gray-700 mt-6 mb-4">Uploaded Documents</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @foreach($registration->documents as $document)
-                <p><strong>{{ $document->document_type }}:</strong> 
-                    <a href="{{ route('documents.view', ['filename' => basename($document->document_path)]) }}" 
-                       class="text-blue-500 underline" target="_blank">
-                       View Document
-                    </a>
-                </p>
-            @endforeach
+        @foreach($registration->documents as $document)
+    <p><strong>{{ $document->document_type }}:</strong> 
+        <a href="{{ asset('storage/' . $document->document_path) }}" target="_blank" class="text-blue-500 underline">
+            View Document
+        </a>
+    </p>
+@endforeach
         </div>
 
-        <!-- Print Application PDF -->
+        <!-- Verification Button -->
         <div class="mt-6 text-center">
-            <a href="{{ route('registration.download', $registration->id) }}" 
-               class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                Print Application PDF
-            </a>
+            <form action="{{ route('registrations.verify', $registration->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    Verify Documents
+                </button>
+            </form>
         </div>
     </div>
 </div>

@@ -13,7 +13,7 @@ class ChairmanController extends Controller
      */
     public function index()
 {
-    $registrations = Registration::where('status', 'pending_chairman_approval')->get();
+    $registrations = Registration::where('status', 'provisionally_approved')->get();
     return view('chairman.dashboard', compact('registrations'));
 }
 

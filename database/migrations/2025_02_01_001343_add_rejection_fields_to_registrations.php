@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+    {
+        Schema::table('registrations', function (Blueprint $table) {
+            $table->string('status')->default('pending')->change(); // Ensure default status
+            $table->unsignedBigInteger('rejected_by')->nullable(); // ✅ Stores supervisor's ID
+            $table->foreign('rejected_by')->references('id')->on('users')->onDelete('set null');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('registrations', function (Blueprint $table) {
+            //
+        });
+    }
+};

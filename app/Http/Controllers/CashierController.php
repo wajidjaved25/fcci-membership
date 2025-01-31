@@ -18,7 +18,7 @@ class CashierController extends Controller
     public function index()
     {
         $registrations = Registration::where('status', 'fee_due')
-            ->where('payment_status', 'pending') // Only show applications needing fee collection
+
             ->get();
 
         // Attach membership fee details dynamically
@@ -34,41 +34,42 @@ class CashierController extends Controller
      * Collect Fee & Update Registration Status
      */
     public function collectFee(Request $request, $id)
-    {
-        $registration = Registration::findOrFail($id);
+{
+    $request->validate([
+        'fee_amount' => 'required|numeric|min:1',
+    ]);
 
-        if (Auth::user()->role !== 'cashier') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
-        }
+    $registration = Registration::findOrFail($id);
 
-        Log::info("Collecting Fee for Registration ID: {$id}");
-        Log::info("Expected Fee Amount from DB: " . $registration->fee_amount);
-        Log::info("Received Fee Amount: " . $request->fee_amount);
-
-        $enteredFee = floatval($request->fee_amount);
-        $expectedFee = floatval($registration->fee_amount);
-
-        if ($enteredFee != $expectedFee) {
-            return response()->json([
-                'success' => false,
-                'message' => "Incorrect fee amount. Expected: Rs. {$expectedFee}, but received: Rs. {$enteredFee}",
-            ], 422);
-        }
-
-        // Update the registration with fee details
-        $registration->update([
-            'status' => 'fee_paid',
-            'payment_status' => 'paid',
-            'fee_paid_at' => now(),
-            'collected_fee_amount' => $enteredFee,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Fee collected successfully.',
-            'redirect_url' => route('cashier.print-receipt', ['id' => $registration->id]),
-        ]);
+    if ($registration->fee_amount != $request->fee_amount) {
+        return response()->json(['success' => false, 'message' => 'Fee amount does not match!']);
     }
+
+    // ✅ Update fee status
+    $registration->update([
+        'status' => 'fee_paid',
+        'payment_status' => 'Paid',
+        'fee_paid_at' => now(),
+    ]);
+
+    // ✅ Generate Receipt URL
+    $receiptUrl = route('cashier.receipt', ['id' => $registration->id]);
+
+    return response()->json([
+        'success' => true,
+        'redirect_url' => $receiptUrl, // ✅ Redirect for auto-print
+    ]);
+}
+public function showReceipt($id)
+{
+    $registration = Registration::findOrFail($id);
+
+    if ($registration->payment_status !== 'Paid') {
+        return redirect()->route('cashier.dashboard')->with('error', 'Receipt not available.');
+    }
+
+    return view('cashier.receipt', compact('registration'));
+}
 
     /**
      * Generate & Print Receipt

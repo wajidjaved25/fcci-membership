@@ -96,8 +96,7 @@
         .then(data => {
             if (data.success) {
                 closeModal();
-                alert("Fee collected successfully!");
-                window.location.href = data.redirect_url;  // Auto print receipt after success
+                window.location.href = data.redirect_url;  // ✅ Auto-redirect to receipt
             } else {
                 alert(data.message || 'Error collecting fee');
             }

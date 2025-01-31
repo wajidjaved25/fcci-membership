@@ -31,14 +31,20 @@ class AccountsController extends Controller
         }
 
         $registration = Registration::findOrFail($id);
-        $registration->update(['status' => 'provisionally_approved']);
+        $registration->update(['status' => 'audited']);
 
         return redirect()->route('accounts.dashboard')->with('success', 'Documents audited successfully.');
     }
 public function show($id)
 {
+    if (Auth::user()->role !== 'accounts_audit') {
+        return redirect()->route('home')->with('error', 'Unauthorized access.');
+    }
+
+    // ✅ Ensure related data is loaded
     $registration = Registration::with(['directorsPartners', 'documents'])->findOrFail($id);
-    
     return view('accounts.show', compact('registration'));
 }
+
+
 }

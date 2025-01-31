@@ -60,7 +60,7 @@
     <div class="content">
         <p><strong>Company Name:</strong> {{ $registration->company_name }}</p>
         <p><strong>Membership Class:</strong> {{ $registration->membership_class }}</p>
-        <p><strong>Fee Amount:</strong> Rs. {{ $registration->fee_paid }}</p>
+        <p><strong>Fee Amount:</strong> Rs. {{ $registration->fee_amount }}</p>
         <p><strong>Date of Payment:</strong> {{ $registration->fee_paid_at }}</p>
         <p><strong>Receipt ID:</strong> FCCI-{{ $registration->id }}</p>
         
