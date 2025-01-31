@@ -33,6 +33,11 @@ class RegistrationController extends Controller
     {
         try {
             $formDetails = RegistrationForm::where('name', $form)->firstOrFail();
+// Define membership fee based on membership class
+        $feeAmount = match ($request->input('membership_class')) {
+            'Corporate' => 15162,
+            'Associate' => 7854,
+            default => 0, // Fallback for undefined classes
 
             // Validate the request
             $validated = $request->validate([
