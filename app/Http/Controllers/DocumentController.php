@@ -10,7 +10,7 @@ class DocumentController extends Controller
 {
     public function viewDocument($filename)
     {
-        $filePath = "public/{$filename}";
+        $filePath = "private/{$filename}";
 
         if (!Storage::exists($filePath)) {
             abort(404, 'File not found');
