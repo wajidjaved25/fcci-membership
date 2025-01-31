@@ -35,4 +35,10 @@ class SecretaryController extends Controller
 
         return redirect()->route('secretary.dashboard')->with('success', 'Provisional membership approved.');
     }
+public function show($id)
+{
+    $registration = Registration::with(['directorsPartners', 'documents'])->findOrFail($id);
+    
+    return view('accounts.show', compact('registration'));
+}
 }

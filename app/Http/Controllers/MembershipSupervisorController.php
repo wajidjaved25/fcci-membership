@@ -30,7 +30,11 @@ public function verifyDocuments($id)
         return redirect()->route('home')->with('error', 'Unauthorized action.');
     }
 
-    return $this->updateRegistrationStatus($id, 'fee_due', 'Documents verified. Fee payment required.');
+    $registration->update([
+        'status' => 'fee_due',
+        'payment_status' => 'pending' // Now it will show in cashier dashboard
+    ]);
+return redirect()->route('supervisor.dashboard')->with('success', 'Documents verified. Fee payment required.');
 }
 
 public function show($id)

@@ -37,6 +37,10 @@
                         <p><strong>Gender:</strong> {{ ucfirst($director->gender) }}</p>
                         <p><strong>Home Address:</strong> {{ $director->home_address }}</p>
                         <p><strong>Phone:</strong> {{ $director->phone ?? 'N/A' }}</p>
+			 <p><strong>CNIC Issue Date:</strong> {{ $director->cnic_issue_date }}</p>
+    <p><strong>CNIC Expiry Date:</strong> {{ $director->cnic_expiry_date }}</p>
+    <p><strong>CNIC Front:</strong> <a href="{{ asset('storage/' . $director->cnic_front) }}" target="_blank">View CNIC Front</a></p>
+    <p><strong>CNIC Back:</strong> <a href="{{ asset('storage/' . $director->cnic_back) }}" target="_blank">View CNIC Back</a></p>
                     </div>
                 @endforeach
             </div>

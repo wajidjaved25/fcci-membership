@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Registration;
 use App\Models\MembershipFee;
 use Illuminate\Http\Request;
@@ -13,8 +14,9 @@ class CashierController extends Controller
 {
     public function index()
     {
-        // Show only applications that require payment (payment_status = 'pending')
-        $registrations = Registration::where('payment_status', 'pending')->get();
+        $registrations = Registration::where('status', 'fee_due')
+                                ->where('payment_status', 'pending') // Only show applications needing fee collection
+                                ->get();
 
         // Fetch membership fee details
         foreach ($registrations as $registration) {
@@ -25,38 +27,60 @@ class CashierController extends Controller
         return view('cashier.dashboard', compact('registrations'));
     }
 
-    public function collectFee(Request $request, $id)
-    {
-        try {
-            $registration = Registration::findOrFail($id);
-            $membershipFee = MembershipFee::where('membership_class', $registration->membership_class)->first();
+public function collectFee(Request $request, $id)
+{
+    $registration = Registration::findOrFail($id);
 
-            if (!$membershipFee) {
-                return redirect()->back()->with('error', 'Membership fee not set.');
-            }
-
-            // Update registration with fee details
-            $registration->update([
-                'fee_paid' => $membershipFee->fee_amount,
-                'fee_paid_at' => now(),
-                'payment_status' => 'paid',
-                'status' => 'fee_paid' // Update status
-            ]);
-
-            Log::info("Fee Collected: Rs. {$membershipFee->fee_amount} for Registration ID: {$registration->id}");
-
-            return redirect()->route('cashier.dashboard')->with('success', 'Fee collected successfully.');
-        } catch (\Exception $e) {
-            Log::error("Fee Collection Error: " . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while collecting the fee.');
-        }
+    if (Auth::user()->role !== 'cashier') {
+        return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
     }
 
-    public function printReceipt($id)
-    {
-        $registration = Registration::findOrFail($id);
+    Log::info("Collecting Fee for Registration ID: {$id}");
+    Log::info("Expected Fee Amount from DB: " . $registration->fee_amount);
+    Log::info("Received Fee Amount: " . $request->fee_amount);
 
-        $pdf = Pdf::loadView('pdf.receipt', compact('registration'));
-        return $pdf->download('receipt_' . $registration->id . '.pdf');
+    $enteredFee = floatval($request->fee_amount);
+    $expectedFee = floatval($registration->fee_amount);
+
+    if ($enteredFee != $expectedFee) {
+        return response()->json([
+            'success' => false,
+            'message' => "Incorrect fee amount. Expected: Rs. {$expectedFee}, but received: Rs. {$enteredFee}",
+        ], 422);
     }
+
+    $registration->update([
+        'status' => 'fee_paid',
+        'payment_status' => 'paid',
+        'fee_paid_at' => now(),
+	'fee_paid' => '$membershipFee'
+        'collected_fee_amount' => $enteredFee,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fee collected successfully.',
+        'redirect_url' => route('cashier.print-receipt', ['id' => $registration->id]),
+    ]);
+}
+
+
+// Generate and Print Receipt
+public function printReceipt($id)
+{
+    $registration = Registration::findOrFail($id);
+
+    // Generate PDF
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt', compact('registration'));
+
+    // Store PDF in storage
+    $pdfPath = 'receipts/receipt_' . $registration->id . '.pdf';
+    \Illuminate\Support\Facades\Storage::disk('public')->put($pdfPath, $pdf->output());
+
+    // Redirect to auto-download the receipt
+    return response()->file(storage_path('app/public/' . $pdfPath), [
+        'Content-Disposition' => 'inline; filename="receipt.pdf"'
+    ]);
+}
+
 }

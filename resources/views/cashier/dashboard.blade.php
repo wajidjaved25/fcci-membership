@@ -5,7 +5,7 @@
     <h1 class="text-center text-3xl font-bold text-gray-800">Cashier Dashboard</h1>
 
     <div class="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 class="text-lg font-bold text-gray-700 mb-4">Pending Membership Payments</h2>
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Pending Fee Collections</h2>
 
         @if($registrations->isEmpty())
             <p class="text-center text-gray-600">No pending payments at the moment.</p>
@@ -16,35 +16,23 @@
                         <tr class="bg-gray-100">
                             <th class="border border-gray-300 px-4 py-2">ID</th>
                             <th class="border border-gray-300 px-4 py-2">Company Name</th>
-                            <th class="border border-gray-300 px-4 py-2">Membership Class</th>
                             <th class="border border-gray-300 px-4 py-2">Fee Amount</th>
-                            <th class="border border-gray-300 px-4 py-2">Status</th>
                             <th class="border border-gray-300 px-4 py-2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($registrations as $registration)
-                            @if($registration->payment_status === 'pending') 
-                            <tr class="text-center">
-                                <td class="border border-gray-300 px-4 py-2">{{ $registration->id }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ $registration->company_name }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ $registration->membership_class }}</td>
-                                <td class="border border-gray-300 px-4 py-2">Rs. {{ $registration->fee_amount }}</td>
-                                <td class="border border-gray-300 px-4 py-2">{{ ucfirst($registration->payment_status) }}</td>
-                                <td class="border border-gray-300 px-4 py-2">
-                                    <form action="{{ route('cashier.collect-fee', $registration->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                            Collect Fee
-                                        </button>
-                                    </form>
-                                    <a href="{{ route('cashier.print-receipt', $registration->id) }}" 
-                                       class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                        Print Receipt
-                                    </a>
-                                </td>
-                            </tr>
-                            @endif
+                        <tr class="text-center">
+                            <td class="border border-gray-300 px-4 py-2">{{ $registration->id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ $registration->company_name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">Rs. {{ number_format($registration->fee_amount, 2) }}</td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                <button onclick="confirmFeeCollection({{ $registration->id }}, {{ $registration->fee_amount }})" 
+                                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                    Collect Fee
+                                </button>
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -52,4 +40,69 @@
         @endif
     </div>
 </div>
+
+<!-- Collect Fee Confirmation Dialog -->
+<div id="feeModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold text-gray-700">Confirm Fee Collection</h2>
+        <p>Enter the collected fee amount:</p>
+        <input type="number" id="feeAmountInput" class="w-full px-4 py-2 border rounded-lg my-2" min="1">
+        <p id="feeError" class="text-red-500 hidden">Amount does not match the expected fee!</p>
+        <div class="flex justify-end mt-4">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-400 text-white rounded-lg mr-2">Cancel</button>
+            <button onclick="submitFeeCollection()" class="px-4 py-2 bg-green-500 text-white rounded-lg">Confirm</button>
+        </div>
+    </div>
+</div>
+<script>
+    let selectedRegistrationId = null;
+    let expectedFee = 0;
+
+    function confirmFeeCollection(registrationId, feeAmount) {
+        selectedRegistrationId = registrationId;
+        expectedFee = parseFloat(feeAmount);
+        document.getElementById('feeAmountInput').value = "";
+        document.getElementById('feeError').classList.add('hidden');
+        document.getElementById('feeModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('feeModal').classList.add('hidden');
+        document.getElementById('feeError').classList.add('hidden');
+    }
+
+    function submitFeeCollection() {
+        let enteredFee = parseFloat(document.getElementById('feeAmountInput').value);
+
+        if (isNaN(enteredFee) || enteredFee.toFixed(2) !== expectedFee.toFixed(2)) {
+            document.getElementById('feeError').textContent = "Amount must match the exact fee: Rs. " + expectedFee.toFixed(2);
+            document.getElementById('feeError').classList.remove('hidden');
+            return;
+        }
+
+        fetch(`/cashier/collect-fee/${selectedRegistrationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ fee_amount: enteredFee })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeModal();
+                alert("Fee collected successfully!");
+                window.location.href = data.redirect_url;
+            } else {
+                alert(data.message || 'Error collecting fee');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An unexpected error occurred.');
+        });
+    }
+</script>
+
 @endsection

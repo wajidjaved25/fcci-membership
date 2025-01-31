@@ -30,21 +30,32 @@ return [
 
     'disks' => [
 
+        // ✅ Local Storage (Default Disk)
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
+            'root' => storage_path('app'),
+            'visibility' => 'private',
             'throw' => false,
         ],
 
+        // ✅ Public Storage (For assets accessible via `/storage`)
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
 
+        // ✅ Private Storage (For Secure Documents)
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',  // Ensure it's private
+            'throw' => false,
+        ],
+
+        // ✅ Amazon S3 Configuration (For Cloud Storage)
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -64,14 +75,14 @@ return [
     | Symbolic Links
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
+    | The `storage:link` command will create symbolic links for storage access.
+    | Here we link both `public` & `private` storage directories.
     |
     */
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('private-storage') => storage_path('app/private'), // ✅ Links private storage
     ],
 
 ];

@@ -12,14 +12,10 @@ class ChairmanController extends Controller
      * Show registrations awaiting final approval.
      */
     public function index()
-    {
-        if (Auth::user()->role !== 'chairman_president') {
-            return redirect()->route('home')->with('error', 'Unauthorized access.');
-        }
-
-        $registrations = Registration::where('status', 'committee_review')->get();
-        return view('chairman.dashboard', compact('registrations'));
-    }
+{
+    $registrations = Registration::where('status', 'pending_chairman_approval')->get();
+    return view('chairman.dashboard', compact('registrations'));
+}
 
     /**
      * Grant final membership approval.

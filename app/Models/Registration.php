@@ -28,6 +28,10 @@ class Registration extends Model
         'product_line',
         'status',
         'rejection_reason',
+	'fee_paid',
+	'fee_paid_at',
+	'payment_status',
+	'fee_amount',
     ];
 
     /**

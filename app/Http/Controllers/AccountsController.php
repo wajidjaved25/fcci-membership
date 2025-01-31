@@ -35,4 +35,10 @@ class AccountsController extends Controller
 
         return redirect()->route('accounts.dashboard')->with('success', 'Documents audited successfully.');
     }
+public function show($id)
+{
+    $registration = Registration::with(['directorsPartners', 'documents'])->findOrFail($id);
+    
+    return view('accounts.show', compact('registration'));
+}
 }

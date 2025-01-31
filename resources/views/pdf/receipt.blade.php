@@ -3,101 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Printable Receipt</title>
+    <title>Receipt</title>
     <style>
-        @page {
-            size: A4;
-            margin: 0;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .receipt {
-            width: 210mm; /* A4 width */
-            height: 297mm; /* A4 height */
-            padding: 30mm; /* Set padding for top, bottom, left, and right */
-            background-color: #fff;
-            margin: 0;
-            border: 1px solid #f1f1f1;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        .logo {
-            width: 120px;
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .header { 
+            text-align: center; 
+            font-size: 24px; 
+            font-weight: bold; 
             margin-bottom: 20px;
+            color: #2c3e50;
         }
-        h2 {
-            text-align: center;
-            color: #333;
-            font-size: 24px;
-            margin-top: 0;
-            font-weight: 600;
+        .header img { 
+            height: 100px; 
+            margin-bottom: 10px; 
         }
         .content {
+            margin-top: 20px; 
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+        .content p {
             font-size: 16px;
-            color: #555;
-            line-height: 1.6;
-            margin-top: 20px;
-        }
-        .highlight {
-            color: #007bff;
-            font-weight: 600;
-        }
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 14px;
-            color: #888;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        .footer img {
-            width: 90px;
+            line-height: 1.5;
             margin-bottom: 10px;
         }
-        .btn {
-            display: block;
-            margin: 30px auto;
-            padding: 12px 25px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
+        .content strong {
+            color: #2980b9;
         }
-        .btn:hover {
-            background-color: #218838;
+        .footer {
+            margin-top: 30px; 
+            text-align: center; 
+            font-size: 14px; 
+            color: #7f8c8d;
+        }
+        .footer p {
+            margin: 0;
+        }
+        .highlight {
+            background-color: #f1c40f;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-
-    <div class="receipt" id="receipt">
-        <div style="text-align: center;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Logo-FCCI.jpg" class="logo" alt="FCCI Logo">
-            <h2>FCCI Membership Fee Receipt</h2>
-        </div>
-
-        <div class="content">
-            <p><strong>Company Name:</strong> <span class="highlight">{{ $registration->company_name }}</span></p>
-            <p><strong>Membership Class:</strong> <span class="highlight">{{ $registration->membership_class }}</span></p>
-            <p><strong>Fee Amount:</strong> <span class="highlight">Rs. {{ $registration->fee_paid }}</span></p>
-            <p><strong>Date of Payment:</strong> <span class="highlight">{{ $registration->fee_paid_at }}</span></p>
-            <p><strong>Receipt ID:</strong> <span class="highlight">FCCI-{{ $registration->id }}</span></p>
-        </div>
-
-        <div class="footer">
-            <img src="https://via.placeholder.com/90" class="logo" alt="SMS App Logo">
-            <p>Powered by SMS App</p>
+    <div class="header">
+        <!-- Implementing the company logo -->
+        <img src="{{ public_path('images/fcci-logo.png') }}" alt="Company Logo" class="company-logo">
+        <p>FCCI Membership Fee Receipt</p>
+    </div>
+    <div class="content">
+        <p><strong>Company Name:</strong> {{ $registration->company_name }}</p>
+        <p><strong>Membership Class:</strong> {{ $registration->membership_class }}</p>
+        <p><strong>Fee Amount:</strong> Rs. {{ $registration->fee_paid }}</p>
+        <p><strong>Date of Payment:</strong> {{ $registration->fee_paid_at }}</p>
+        <p><strong>Receipt ID:</strong> FCCI-{{ $registration->id }}</p>
+        
+        <!-- Highlighting the Fee Amount -->
+        <div class="highlight">
+            <p>Total Fee Paid: Rs. {{ $registration->fee_paid }}</p>
         </div>
     </div>
-
-    <button class="btn" onclick="window.print()">Print Receipt</button>
-
+    <div class="footer">
+        <p>Thank you for your payment!</p>
+    </div>
 </body>
 </html>

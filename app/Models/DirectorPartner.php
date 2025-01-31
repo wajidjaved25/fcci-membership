@@ -18,6 +18,10 @@ class DirectorPartner extends Model
         'home_address',
         'phone',
         'registration_id',
+	'cnic_issue_date',
+	'cnic_expiry_date',
+	'cnic_front',
+	'cnic_back',
     ];
 
     public function registration()
