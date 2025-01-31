@@ -140,6 +140,26 @@
                 <!-- Company Details Section -->
 <h2 class="section-title">Company Details</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+@if($formDetails->name === 'Proprietorship')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Proprietorship">Proprietorship</option>
+    </select>
+@endif
+@if($formDetails->name === 'Partnership')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Partnership">Partnership</option>
+        <option value="AOP">Association of Persons (AOP)</option>
+    </select>
+@endif
+@if($formDetails->name === 'Limited Company')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Private Limited">Private Limited</option>
+        <option value="Public Limited">Public Limited</option>
+    </select>
+@endif
     @foreach([
         'company_name' => ['label' => 'Company Name', 'placeholder' => 'Enter your registered company name'],
         'address' => ['label' => 'Address', 'placeholder' => 'Enter company address'],

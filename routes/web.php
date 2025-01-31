@@ -94,8 +94,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/supervisor/reject/{id}', [MembershipSupervisorController::class, 'rejectApplication'])->name('supervisor.reject');
     Route::post('/accounts/registrations/{id}/audit', [AccountsController::class, 'auditDocuments'])->name('accounts.audit');
+    Route::post('/secretary/assign-membership/{id}', [SecretaryController::class, 'assignMembershipNumber'])->name('secretary.assign-membership');
+    Route::post('/secretary/approve-provisional/{id}', [SecretaryController::class, 'approveProvisionalMembership'])
+    ->name('secretary.approve-provisional');
 
-
-Route::post('/registrations/{id}/forward-to-chairman', [RegistrationController::class, 'forwardToChairman'])
+    Route::post('/registrations/{id}/forward-to-chairman', [RegistrationController::class, 'forwardToChairman'])
     ->name('registrations.forward_to_chairman');
 });

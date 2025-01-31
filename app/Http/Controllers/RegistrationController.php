@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class RegistrationController extends Controller
 {
@@ -47,7 +48,7 @@ class RegistrationController extends Controller
                 'mobile' => 'required|string|max:20',
                 'email' => 'nullable|email|max:255',
                 'website' => 'nullable|string|max:255',
-                'membership_class' => 'required|string',
+                'membership_class' => ['required', Rule::in(['Corporate', 'Associate'])],
                 'year_establishment' => 'required|integer|min:1800|max:' . date('Y'),
                 'ntn' => 'nullable|string|max:50',
                 'sales_tax_number' => 'nullable|string|max:50',
@@ -63,10 +64,16 @@ class RegistrationController extends Controller
                 'directors.*.home_address' => 'required|string|max:255',
                 'directors.*.phone' => 'nullable|string|max:20',
                 'directors.*.cnic_issue_date' => 'required|date',
-		'directors.*.cnic_expiry_date' => 'required|date|after:directors.*.cnic_issue_date',
-		'directors.*.cnic_front' => 'required|file|mimes:jpg,png,pdf|max:2048',
-		'directors.*.cnic_back' => 'required|file|mimes:jpg,png,pdf|max:2048',
+		        'directors.*.cnic_expiry_date' => 'required|date|after:directors.*.cnic_issue_date',
+		        'directors.*.cnic_front' => 'required|file|mimes:jpg,png,pdf|max:2048',
+		        'directors.*.cnic_back' => 'required|file|mimes:jpg,png,pdf|max:2048',
                 'documents.*' => 'file|mimes:pdf,jpg,png|max:2048',
+                // ✅ New Validation Rule for Firm Type
+                'firm_type' => [
+                'required',
+                'string',
+                Rule::in(['Proprietorship', 'Partnership', 'AOP', 'Private Limited', 'Public Limited'])
+                ],
             ]);
 
             // Create User or Retrieve Existing
@@ -100,9 +107,10 @@ class RegistrationController extends Controller
                 'product_line' => $validated['product_line'],
                 'testimonial_1' => $validated['testimonial_1'],
                 'testimonial_2' => $validated['testimonial_2'],
+                'firm_type' => $validated['firm_type'],
                 'status' => 'pending',
-		'payment_status' => 'not_required', // Do not show in cashier dashboard yet
-		'fee_amount' => $feeAmount, // Store correct fee
+		        'payment_status' => 'not_required', // Do not show in cashier dashboard yet
+		        'fee_amount' => $feeAmount, // Store correct fee
             ]);
 
 	// Validate the request
@@ -223,7 +231,7 @@ public function forwardToChairman($id)
     }
 
     // Update application status
-    $registration->update(['status' => 'pending_chairman_approval']);
+    $registration->update(['status' => 'provisionally_approved']);
 
     return redirect()->route('secretary.dashboard')->with('success', 'Application forwarded to Chairman for final approval.');
 }

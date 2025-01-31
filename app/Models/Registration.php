@@ -33,6 +33,8 @@ class Registration extends Model
 	    'payment_status',
 	    'fee_amount',
         'rejected_by',
+        'firm_type',
+        'membership_number',
     ];
 
     /**

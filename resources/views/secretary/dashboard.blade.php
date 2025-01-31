@@ -21,7 +21,9 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Membership No.</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -30,7 +32,7 @@
                         <td class="px-6 py-4 text-sm text-gray-500">{{ $registration->id }}</td>
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ $registration->company_name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">{{ ucfirst($registration->status) }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">
+                        
                         <td class="px-6 py-4 text-sm text-gray-500">
                          @if(strtolower($registration->payment_status) === 'paid')
                         <span class="text-green-600 font-bold">Paid</span> 
@@ -38,6 +40,9 @@
                         @else
                         <span class="text-red-600 font-bold">Pending</span>
                         @endif
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                        {{ $registration->membership_number ?? 'Not Assigned' }}
                         </td>
                         <td class="px-6 py-4 text-center">
                             <a href="{{ route('secretary.show', $registration->id) }}" 
@@ -48,11 +53,11 @@
                                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                                 Print PDF
                             </a>
-                            <form action="{{ route('registrations.forward_to_chairman', $registration->id) }}" method="POST" class="inline-block">
-                                @csrf
-                                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                    Forward to Chairman
-                                </button>
+                            <form action="{{ route('secretary.approve-provisional', $registration->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                            Approve Provisional Membership
+                            </button>
                             </form>
                         </td>
                     </tr>

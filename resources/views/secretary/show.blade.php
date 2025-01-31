@@ -20,6 +20,7 @@
         <p><strong>Product Line:</strong> {{ $registration->product_line }}</p>
         <p><strong>Testimonial 1:</strong> {{ $registration->testimonial_1 }}</p>
         <p><strong>Testimonial 2:</strong> {{ $registration->testimonial_2 }}</p>
+        <p><strong>Membership Number:</strong> {{ $registration->membership_number ?? 'Not Assigned' }}</p>
 
         <!-- Directors/Partners Information -->
         <h2 class="text-xl font-bold text-gray-700 mt-6 mb-4">Proprietor/Directors/Partners Details</h2>
