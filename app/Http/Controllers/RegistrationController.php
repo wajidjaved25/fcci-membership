@@ -38,7 +38,7 @@ class RegistrationController extends Controller
             'Corporate' => 15162,
             'Associate' => 7854,
             default => 0, // Fallback for undefined classes
-
+};
             // Validate the request
             $validated = $request->validate([
                 'company_name' => 'required|string|max:255',
