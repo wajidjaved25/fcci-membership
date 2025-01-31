@@ -54,7 +54,7 @@ public function collectFee(Request $request, $id)
         'payment_status' => 'paid',
         'fee_paid_at' => now(),
 	'fee_paid' => '$membershipFee'
-        'collected_fee_amount' => $enteredFee,
+        
     ]);
 
     return response()->json([
