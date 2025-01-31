@@ -12,7 +12,6 @@ return new class extends Migration
     public function up()
     {
         Schema::table('registrations', function (Blueprint $table) {
-            $table->string('status')->default('pending')->change(); // Ensure default status
             $table->unsignedBigInteger('rejected_by')->nullable(); // ✅ Stores supervisor's ID
             $table->foreign('rejected_by')->references('id')->on('users')->onDelete('set null');
         });
