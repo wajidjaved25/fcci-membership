@@ -93,7 +93,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Document Viewing Route
 Route::get('/documents/view/{filename}', [DocumentController::class, 'viewDocument'])->name('documents.view');
-
+{
+    $path = storage_path("app/documents/$filename");
 
     // ✅ Ensure file exists
     if (!file_exists($path)) {
