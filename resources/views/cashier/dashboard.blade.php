@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
-    <h1 class="text-center text-3xl font-bold text-gray-800">Cashier Dashboard</h1>
+    <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Cashier Dashboard</h1>
 
     <div class="bg-white p-6 rounded-lg shadow mt-6">
         <h2 class="text-xl font-bold text-gray-700 mb-4">Pending Fee Collections</h2>
@@ -54,6 +54,10 @@
         </div>
     </div>
 </div>
+
+<!-- CSRF Token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <script>
     let selectedRegistrationId = null;
     let expectedFee = 0;
@@ -74,17 +78,17 @@
     function submitFeeCollection() {
         let enteredFee = parseFloat(document.getElementById('feeAmountInput').value);
 
-        if (isNaN(enteredFee) || enteredFee.toFixed(2) !== expectedFee.toFixed(2)) {
+        if (isNaN(enteredFee) || Math.abs(enteredFee - expectedFee) > 0.01) {
             document.getElementById('feeError').textContent = "Amount must match the exact fee: Rs. " + expectedFee.toFixed(2);
             document.getElementById('feeError').classList.remove('hidden');
             return;
         }
 
-        fetch(`/cashier/collect-fee/${selectedRegistrationId}`, {
+        fetch(`{{ route('cashier.collect-fee', '') }}/${selectedRegistrationId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ fee_amount: enteredFee })
         })
@@ -93,7 +97,7 @@
             if (data.success) {
                 closeModal();
                 alert("Fee collected successfully!");
-                window.location.href = data.redirect_url;
+                window.location.href = data.redirect_url;  // Auto print receipt after success
             } else {
                 alert(data.message || 'Error collecting fee');
             }

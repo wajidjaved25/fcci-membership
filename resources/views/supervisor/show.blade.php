@@ -61,8 +61,7 @@
                 <p><strong>{{ $document->document_type }}:</strong> 
                     <a href="{{ route('documents.view', ['filename' => basename($document->document_path)]) }}" target="_blank">
    View Document
-</a>
-                </p>
+</a>                </p>
             @endforeach
         </div>
 
