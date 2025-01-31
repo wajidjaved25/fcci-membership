@@ -90,24 +90,19 @@ Route::middleware(['auth'])->group(function () {
     // Fee collection & receipt printing
     Route::post('/cashier/collect-fee/{id}', [CashierController::class, 'collectFee'])->name('cashier.collect-fee');
     Route::get('/cashier/print-receipt/{id}', [CashierController::class, 'printReceipt'])->name('cashier.print-receipt');
+    Route::get('/cashier/receipt/{id}', [CashierController::class, 'showReceipt'])->name('cashier.receipt');
 
-    // Document Viewing Route
-Route::get('/documents/view/{filename}', [DocumentController::class, 'viewDocument'])->name('documents.view');
-Route::get('/documents/view/{filename}', function ($filename) {
-    $path = storage_path("app/documents/$filename");
+    Route::post('/supervisor/reject/{id}', [MembershipSupervisorController::class, 'rejectApplication'])->name('supervisor.reject');
+    Route::post('/accounts/registrations/{id}/audit', [AccountsController::class, 'auditDocuments'])->name('accounts.audit');
+    Route::post('/secretary/assign-membership/{id}', [SecretaryController::class, 'assignMembershipNumber'])->name('secretary.assign-membership');
+    Route::post('/secretary/approve-provisional/{id}', [SecretaryController::class, 'approveProvisionalMembership'])
+    ->name('secretary.approve-provisional');
 
-    // ✅ Ensure file exists
-    if (!file_exists($path)) {
-        abort(404, 'File not found.');
-    }
+    Route::get('/chairman/dashboard', [ChairmanController::class, 'index'])->name('chairman.dashboard');
+    Route::get('/chairman/registrations/{id}', [ChairmanController::class, 'show'])->name('chairman.show');
+    Route::post('/chairman/approve/{id}', [ChairmanController::class, 'approveMembership'])->name('chairman.approve');
+    Route::post('/chairman/reject/{id}', [ChairmanController::class, 'rejectMembership'])->name('chairman.reject');
 
-    // ✅ Check if user is authenticated (Optional)
-    if (!Auth::check()) {
-        abort(403, 'Unauthorized access.');
-    }
-
-    return response()->file($path);
-})->name('documents.view');
-Route::post('/registrations/{id}/forward-to-chairman', [RegistrationController::class, 'forwardToChairman'])
+    Route::post('/registrations/{id}/forward-to-chairman', [RegistrationController::class, 'forwardToChairman'])
     ->name('registrations.forward_to_chairman');
 });
