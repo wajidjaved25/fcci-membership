@@ -208,9 +208,9 @@ public function downloadPDF($id)
         ]); 
     }
 
-    public function auditDocuments($id) { return $this->updateRegistrationStatus($id, 'provisionally_approved', 'Documents audited successfully.'); }
+    public function auditDocuments($id) { return $this->updateRegistrationStatus($id, 'audited', 'Documents audited successfully.'); }
     
-    public function approveProvisionalMembership($id) { return $this->updateRegistrationStatus($id, 'committee_review', 'Provisional membership approved.'); }
+    public function approveProvisionalMembership($id) { return $this->updateRegistrationStatus($id, 'provisionally_approved', 'Provisional membership approved.'); }
     
     public function grantFinalApproval($id) { return $this->updateRegistrationStatus($id, 'final_approval', 'Membership approved.'); }
 public function forwardToChairman($id)
