@@ -32,7 +32,7 @@
                         <td class="px-6 py-4 text-sm text-gray-500">{{ ucfirst($registration->status) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">
                             @if($registration->payment_status === 'paid')
-                                <span class="text-green-600 font-bold">Paid</span> (Rs. {{ number_format($registration->fee_paid) }})
+                                <span class="text-green-600 font-bold">Paid</span> (Rs. {{ number_format($registration->fee_amount) }})
                             @else
                                 <span class="text-red-600 font-bold">Pending</span>
                             @endif

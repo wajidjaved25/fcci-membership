@@ -31,7 +31,7 @@ class SecretaryController extends Controller
         }
 
         $registration = Registration::findOrFail($id);
-        $registration->update(['status' => 'committee_review']);
+        $registration->update(['status' => 'provisionally_approved']);
 
         return redirect()->route('secretary.dashboard')->with('success', 'Provisional membership approved.');
     }
