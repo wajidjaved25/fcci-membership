@@ -31,11 +31,13 @@
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ $registration->company_name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">{{ ucfirst($registration->status) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">
-                            @if($registration->payment_status === 'paid')
-                                <span class="text-green-600 font-bold">Paid</span> (Rs. {{ number_format($registration->fee_amount) }})
-                            @else
-                                <span class="text-red-600 font-bold">Pending</span>
-                            @endif
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                         @if(strtolower($registration->payment_status) === 'paid')
+                        <span class="text-green-600 font-bold">Paid</span> 
+                        (Rs. {{ number_format($registration->fee_amount) }})
+                        @else
+                        <span class="text-red-600 font-bold">Pending</span>
+                        @endif
                         </td>
                         <td class="px-6 py-4 text-center">
                             <a href="{{ route('secretary.show', $registration->id) }}" 
