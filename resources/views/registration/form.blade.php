@@ -235,7 +235,7 @@
             <label for="{{ $field }}" class="label">{{ $label }}</label>
             <input type="text" id="{{ $field }}" name="{{ $field }}" 
                 value="{{ old($field) }}" class="input-field" 
-                placeholder="Enter your Reference Membership Numberr or 0000">
+                placeholder="Enter Reference Membership Number or 0000">
         </div>
     @endforeach
 </div>
@@ -367,6 +367,15 @@ document.addEventListener('click', function (e) {
     }
         });
     </script>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 @if(session('download_url'))
     <script>
         window.onload = function() {
