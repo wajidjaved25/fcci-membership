@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class SecretaryController extends Controller
 {
@@ -27,37 +28,58 @@ class SecretaryController extends Controller
      * Approve provisional membership and send to committee review.
      */
     public function approveProvisionalMembership($id)
-    {
-        Log::info("✅ Secretary Approval Function Called for Registration ID: $id");
-    
-        if (Auth::user()->role !== 'dg_secretary') {
-            Log::error("❌ Unauthorized access attempt by User ID: " . Auth::id());
-            return redirect()->route('home')->with('error', 'Unauthorized action.');
-        }
-    
-        $registration = Registration::findOrFail($id);
-        Log::info("✅ Registration Found: " . json_encode($registration));
-    
-        // Generate Membership Number
-        $membershipNumber = $this->generateMembershipNumber($registration);
-    
-        Log::info("✅ Generated Membership Number: " . ($membershipNumber ?? 'NULL'));
-    
-        if (!$membershipNumber) {
-            Log::error("❌ Membership number generation failed.");
-            return redirect()->route('secretary.dashboard')->with('error', 'Membership number generation failed.');
-        }
-    
-        // Update Status and Assign Membership Number
-        $registration->update([
-            'status' => 'provisionally_approved',
-            'membership_number' => $membershipNumber,
-        ]);
-    
-        Log::info("✅ Registration Updated Successfully: " . json_encode($registration));
-    
-        return redirect()->route('secretary.dashboard')->with('success', 'Provisional membership approved and membership number assigned.');
+{
+    Log::info("✅ Secretary Approval Function Called for Registration ID: $id");
+
+    // ✅ Ensure Only Secretary Can Approve
+    if (Auth::user()->role !== 'dg_secretary') {
+        Log::error("❌ Unauthorized access attempt by User ID: " . Auth::id());
+        return redirect()->route('home')->with('error', 'Unauthorized action.');
     }
+
+    // ✅ Ensure Registration Exists
+    $registration = Registration::findOrFail($id);
+    Log::info("✅ Registration Found: " . json_encode($registration));
+
+    // ✅ Generate Membership Number
+    $membershipNumber = $this->generateMembershipNumber($registration);
+
+    Log::info("✅ Generated Membership Number: " . ($membershipNumber ?? 'NULL'));
+
+    if (!$membershipNumber) {
+        Log::error("❌ Membership number generation failed.");
+        return redirect()->route('secretary.dashboard')->with('error', 'Membership number generation failed.');
+    }
+
+    // ✅ Update Registration Status and Assign Membership Number
+    $registration->update([
+        'status' => 'provisionally_approved',
+        'membership_number' => $membershipNumber,
+    ]);
+
+    Log::info("✅ Registration Updated Successfully: " . json_encode($registration));
+
+    // ✅ Assign "member" role to the user
+    $user = User::find($registration->user_id);
+
+    if (!$user) {
+        Log::error("❌ Error: User with ID {$registration->user_id} not found.");
+        return redirect()->route('secretary.dashboard')->with('error', 'Associated user not found.');
+    }
+
+    // ✅ Ensure the "role" is fillable in User Model
+    $user->role = 'member';
+    $saved = $user->save();
+
+    if ($saved) {
+        Log::info("✅ User Role Updated to 'member' for User ID: {$user->id}");
+    } else {
+        Log::error("❌ Error: Failed to update role for User ID: {$user->id}");
+        return redirect()->route('secretary.dashboard')->with('error', 'Failed to update user role.');
+    }
+
+    return redirect()->route('secretary.dashboard')->with('success', 'Provisional membership approved and membership number assigned.');
+}
 
 /**
  * Generate Membership Number Based on Coding Scheme

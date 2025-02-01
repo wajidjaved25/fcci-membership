@@ -33,19 +33,16 @@ class RegistrationController extends Controller
     public function submitForm(Request $request, $form)
     {
         try {
-            // ✅ Retrieve Form Details
             $formDetails = RegistrationForm::where('name', $form)->firstOrFail();
-
-            // ✅ Define Membership Fee Based on Membership Class
-            $feeAmount = match ($request->input('membership_class')) {
-                'Corporate' => 15162,
-                'Associate' => 7854,
-                default => 0,
-            };
-
-            // ✅ Validate Request
+// Define membership fee based on membership class
+        $feeAmount = match ($request->input('membership_class')) {
+            'Corporate' => 15162,
+            'Associate' => 7854,
+            default => 0, // Fallback for undefined classes
+};
+            // Validate the request
             $validated = $request->validate([
-                'company_name' => 'required|string|max:255|unique:registrations,company_name',
+                'company_name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
                 'telephone' => 'nullable|string|max:20',
                 'mobile' => 'required|string|max:20',
@@ -59,7 +56,6 @@ class RegistrationController extends Controller
                 'product_line' => 'nullable|string|max:255',
                 'testimonial_1' => 'nullable|string|max:255',
                 'testimonial_2' => 'nullable|string|max:255',
-                'firm_type' => ['required', 'string', Rule::in(['Proprietorship', 'Partnership', 'AOP', 'Private Limited', 'Public Limited'])],
                 'directors.*.name' => 'required|string|max:255',
                 'directors.*.cnic_number' => 'required|string|max:15',
                 'directors.*.relation' => 'required|string|max:50',
@@ -68,28 +64,32 @@ class RegistrationController extends Controller
                 'directors.*.home_address' => 'required|string|max:255',
                 'directors.*.phone' => 'nullable|string|max:20',
                 'directors.*.cnic_issue_date' => 'required|date',
-                'directors.*.cnic_expiry_date' => 'required|date|after:directors.*.cnic_issue_date',
-                'directors.*.cnic_front' => 'required|file|mimes:jpg,png,pdf|max:2048',
-                'directors.*.cnic_back' => 'required|file|mimes:jpg,png,pdf|max:2048',
+		        'directors.*.cnic_expiry_date' => 'required|date|after:directors.*.cnic_issue_date',
+		        'directors.*.cnic_front' => 'required|file|mimes:jpg,png,pdf|max:2048',
+		        'directors.*.cnic_back' => 'required|file|mimes:jpg,png,pdf|max:2048',
                 'documents.*' => 'file|mimes:pdf,jpg,png|max:2048',
+                // ✅ New Validation Rule for Firm Type
+                'firm_type' => [
+                'required',
+                'string',
+                Rule::in(['Proprietorship', 'Partnership', 'AOP', 'Private Limited', 'Public Limited'])
+                ],
             ]);
 
-            // ✅ Check if User Exists or Create New User
-            $user = User::where('mobile_number', $validated['mobile'])
-                ->where('email', $validated['email'])
-                ->first();
-
-            if (!$user) {
-                $user = User::create([
-                    'name' => $validated['company_name'],
+            // Create User or Retrieve Existing
+            $user = User::firstOrCreate(
+                [
                     'mobile_number' => $validated['mobile'],
                     'email' => $validated['email'],
+                ],
+                [
+                    'name' => $validated['company_name'],
                     'password' => bcrypt('temporary-password'),
                     'role' => 'pending',
-                ]);
-            }
+                ]
+            );
 
-            // ✅ Create New Registration for the User
+            // Create Registration
             $registration = Registration::create([
                 'user_id' => $user->id,
                 'form_id' => $formDetails->id,
@@ -109,74 +109,89 @@ class RegistrationController extends Controller
                 'testimonial_2' => $validated['testimonial_2'],
                 'firm_type' => $validated['firm_type'],
                 'status' => 'pending',
-                'payment_status' => 'not_required',
-                'fee_amount' => $feeAmount,
+		        'payment_status' => 'not_required', // Do not show in cashier dashboard yet
+		        'fee_amount' => $feeAmount, // Store correct fee
             ]);
 
-            // ✅ Save Directors/Partners Data
-            foreach ($request->input('directors', []) as $index => $director) {
-                $directorData = $director;
+	// Validate the request
+        $validated = $request->validate([
+            'directors.*.date_of_birth' => 'required|date_format:Y-m-d',
+        ]);
 
-                if ($request->hasFile("directors.$index.cnic_front")) {
-                    $directorData['cnic_front'] = $request->file("directors.$index.cnic_front")
-                        ->store('documents', 'public');
-                }
-                if ($request->hasFile("directors.$index.cnic_back")) {
-                    $directorData['cnic_back'] = $request->file("directors.$index.cnic_back")
-                        ->store('documents', 'public');
-                }
-
-                $registration->directorsPartners()->create($directorData);
-            }
-
-            // ✅ Save Uploaded Documents
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $index => $file) {
-                    $documentName = $request->input("document_names.$index") ?? 'Unknown Document';
-                    $path = $file->store('documents', 'public');
-
-                    RegistrationDocument::create([
-                        'registration_id' => $registration->id,
-                        'document_type' => $documentName,
-                        'document_path' => $path,
-                    ]);
+        // Convert date format from DD/MM/YYYY to YYYY-MM-DD
+        if ($request->has('directors')) {
+            foreach ($request->input('directors') as $index => $director) {
+                if (isset($director['date_of_birth'])) {
+                    $validated['directors'][$index]['date_of_birth'] = date('Y-m-d', strtotime(str_replace('/', '-', $director['date_of_birth'])));
                 }
             }
+        }
+// Save Directors/Partners
+if ($request->has('directors')) {
+    foreach ($request->input('directors') as $index => $director) {
+        $directorData = $director;
 
-            // ✅ Generate PDF
+        if ($request->hasFile("directors.$index.cnic_front")) {
+            $directorData['cnic_front'] = $request->file("directors.$index.cnic_front")
+                ->store('documents', 'public'); // ✅ Store in 'storage/app/public/documents'
+        }
+        if ($request->hasFile("directors.$index.cnic_back")) {
+            $directorData['cnic_back'] = $request->file("directors.$index.cnic_back")
+                ->store('documents', 'public'); // ✅ Store in 'storage/app/public/documents'
+        }
+
+        // ✅ Store director data in the database
+        $registration->directorsPartners()->create($directorData);
+    }
+}
+
+// Save Uploaded Documents
+if ($request->hasFile('documents')) {
+    foreach ($request->file('documents') as $index => $file) {
+        $documentName = $request->input("document_names.$index") ?? 'Unknown Document';
+
+        $path = $file->store('documents', 'public'); // ✅ Correct storage path
+
+        RegistrationDocument::create([
+            'registration_id' => $registration->id,
+            'document_type' => $documentName,
+            'document_path' => $path, // ✅ Store only 'documents/filename.pdf'
+        ]);
+    }
+}
+
+
+            // Generate PDF
             $pdf = Pdf::loadView('pdf.registration', compact('registration'));
             $pdfPath = 'pdfs/registration_' . $registration->id . '.pdf';
             Storage::disk('public')->put($pdfPath, $pdf->output());
 
-            // ✅ Return Response
+            // Redirect with success message & PDF download
             return redirect()->route('register.show', $form)->with([
                 'success' => 'Registration submitted successfully!',
                 'download_url' => asset('storage/' . $pdfPath)
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->validator->errors())->withInput();
         } catch (\Exception $e) {
-            Log::error('Registration error: ' . $e->getMessage());
-            return back()->withErrors('An unexpected error occurred. Please try again.')->withInput();
+            \Log::error('Error during registration: ' . $e->getMessage());
+            return back()->withErrors('An error occurred while submitting the registration form. Please try again.');
         }
     }
 
     /**
      * Download the generated PDF.
      */
-    public function downloadPDF($id)
-    {
-        $registration = Registration::findOrFail($id);
-        $pdfPath = 'pdfs/registration_' . $registration->id . '.pdf';
+public function downloadPDF($id)
+{
+    $registration = Registration::findOrFail($id);
+    $pdfPath = 'pdfs/registration_' . $registration->id . '.pdf';
 
-        if (!Storage::disk('public')->exists($pdfPath)) {
-            return redirect()->back()->with('error', 'PDF not found.');
-        }
-
-        return response()->download(storage_path("app/public/{$pdfPath}"));
+    if (!Storage::disk('public')->exists($pdfPath)) {
+        return redirect()->back()->with('error', 'PDF not found.');
     }
 
+    return response()->download(storage_path('app/public/' . $pdfPath));
+}
     /**
      * Update Registration Status
      */

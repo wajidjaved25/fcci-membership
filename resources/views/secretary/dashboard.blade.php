@@ -49,10 +49,11 @@
                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                                 View Application
                             </a>
-                            <a href="{{ route('registration.download', $registration->id) }}" 
-                               class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                                Print PDF
-                            </a>
+                            <a href="{{ route('registrations.download-pdf', $registration->id) }}" 
+   class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+    Print PDF
+</a>
+
                             <form action="{{ route('secretary.approve-provisional', $registration->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">

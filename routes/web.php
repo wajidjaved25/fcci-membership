@@ -10,6 +10,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\SecretaryController;
 use App\Http\Controllers\ChairmanController;
+use App\Http\Controllers\MemberController;
 
 // Home route (Redirects based on role)
 Route::get('/', function () {
@@ -26,6 +27,7 @@ Route::get('/home', function () {
             'accounts_audit' => redirect()->route('accounts.dashboard'),
             'dg_secretary' => redirect()->route('secretary.dashboard'),
             'chairman_president' => redirect()->route('chairman.dashboard'),
+            'member' => redirect()->route('member.dashboard'),
             default => redirect('/'),
         };
     }
@@ -106,5 +108,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/registrations/{id}', [ChairmanController::class, 'show'])->name('show');
         Route::post('/approve/{id}', [ChairmanController::class, 'approveMembership'])->name('approve');
         Route::post('/reject/{id}', [ChairmanController::class, 'rejectMembership'])->name('reject');
+    });
+
+    // **Member Routes**
+    Route::prefix('member')->name('member.')->group(function () {
+        Route::get('/dashboard', [MemberController::class, 'index'])->name('dashboard');
+        Route::post('/renew-membership', [MemberController::class, 'renewMembership'])->name('renew');
+        Route::post('/request-visa-letter', [MemberController::class, 'requestVisaLetter'])->name('visa');
     });
 });
