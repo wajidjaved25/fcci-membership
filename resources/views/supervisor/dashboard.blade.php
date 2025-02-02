@@ -34,7 +34,7 @@
                                 </a>
 
                                 <!-- Verify Documents -->
-                                <form action="{{ route('registrations.verify', $registration->id) }}" method="POST">
+                                <form action="{{ route('supervisor.verify', $registration->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
                                         Verify Documents
@@ -53,6 +53,11 @@
                         @endforeach
                     </tbody>
                 </table>
+                            <!-- ✅ Pagination Links -->
+            <div class="mt-4">
+                {{ $registrations->links() }}
+            </div>
+        </div>
             </div>
         @endif
     </div>

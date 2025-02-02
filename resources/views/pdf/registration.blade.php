@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membership Registration</title>
     <style>
         /* Base Styling */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f5f7fa;
@@ -16,99 +17,120 @@
         /* Header Styling */
         header {
             text-align: center;
-            padding: 30px 0;
-            background-color: #004080;
-            color: white;
-            margin-bottom: 40px;
-            border-bottom: 5px solid #003366;
+            padding: 25px;
+            background: linear-gradient(135deg, #ffffff, #dbe6f1);
+            color: #1d3557;
+            border-bottom: 4px solid #e1ad01;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
         header img {
-            max-width: 120px;
+            max-width: 90px;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            margin: 10px 0 0;
-            font-weight: bold;
-            letter-spacing: 1px;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        /* Details Section */
-        .details {
-            margin: 0 auto;
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            background: white;
+            margin: 40px auto;
             padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
         }
 
-        /* Section Headings */
-        .details h2 {
-            font-size: 1.8rem;
-            color: #004080;
+        /* Section Titles */
+        h2 {
+            font-size: 1.5rem;
+            color: #1d3557;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #e1ad01;
+            padding-bottom: 6px;
+            font-weight: 600;
+        }
+
+        /* Info Text */
+        .info-text {
+            font-size: 1rem;
+            color: #555;
+            background: #f8f9fc;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
             margin-bottom: 20px;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #004080;
+        }
+
+        /* Download PDF Button */
+        .btn-download {
+            background: #1d3557;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            display: block;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .btn-download:hover {
+            background: #16324f;
         }
 
         /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-radius: 8px;
             overflow: hidden;
+            background: white;
+            border: 1px solid #ddd;
         }
 
         th, td {
-            padding: 14px 16px;
+            padding: 12px;
             text-align: left;
             font-size: 1rem;
+            border-bottom: 1px solid #ddd;
         }
 
         th {
-            background-color: #004080;
-            color: white;
+            background: #dbe6f1;
+            color: #1d3557;
             font-weight: bold;
         }
 
         td {
-            background-color: #f9f9f9;
-        }
-
-        /* Table Row Striping and Hover */
-        tbody tr:nth-child(odd) td {
-            background-color: #ffffff;
+            background: #ffffff;
         }
 
         tbody tr:hover td {
-            background-color: #eaf3ff;
+            background-color: #eef3fa;
+            transition: background 0.3s ease-in-out;
         }
 
-        /* No Border Table */
-        th, td {
-            border: none;
-        }
-
-        /* Media Queries for Responsiveness */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .details {
+            .container {
                 padding: 20px;
             }
 
             header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
-            .details h2 {
-                font-size: 1.5rem;
-            }
-
-            table th, table td {
-                padding: 10px;
+            h2 {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -116,36 +138,27 @@
 <body>
     <header>
         <img src="{{ public_path('images/fcci-logo.png') }}" alt="FCCI Logo">
-        <h1>Membership Registration Application</h1>
+        <h1>Membership Registration</h1>
     </header>
-    <div class="details">
+
+    <div class="container">
         <h2>Company Details</h2>
         <table>
-            <tr>
-                <th>Company Name</th>
-                <td>{{ $registration->company_name }}</td>
-            </tr>
-            <tr>
-                <th>Address</th>
-                <td>{{ $registration->address }}</td>
-            </tr>
-            <tr>
-                <th>Mobile</th>
-                <td>{{ $registration->mobile }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ $registration->email }}</td>
-            </tr>
-            <tr>
-                <th>Website</th>
-                <td>{{ $registration->website }}</td>
-            </tr>
-            <tr>
-                <th>Main Business</th>
-                <td>{{ $registration->main_business }}</td>
-            </tr>
+            <tr><th>Company Name</th> <td>{{ $registration->company_name }}</td></tr>
+            <tr><th>Address</th> <td>{{ $registration->address }}</td></tr>
+            <tr><th>Mobile</th> <td>{{ $registration->mobile }}</td></tr>
+            <tr><th>Email</th> <td>{{ $registration->email }}</td></tr>
+            <tr><th>Website</th> <td>{{ $registration->website }}</td></tr>
+            <tr><th>Main Business</th> <td>{{ $registration->main_business }}</td></tr>
         </table>
+
+        <h2>Additional Information</h2>
+        <div class="info-text">
+            NTN: <strong>{{ $registration->ntn }}</strong> <br>
+            Sales Tax Number: <strong>{{ $registration->sales_tax_number }}</strong> <br>
+            Product Line: <strong>{{ $registration->product_line }}</strong>
+        </div>
+
 
         <h2>Directors/Partners</h2>
         <table>
@@ -173,16 +186,10 @@
 
         <h2>Uploaded Documents</h2>
         <table>
-            <thead>
-                <tr>
-                    <th>Document Type</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Document Type</th></tr></thead>
             <tbody>
                 @foreach ($registration->documents as $document)
-                    <tr>
-                        <td>{{ $document->document_type }}</td>
-                    </tr>
+                    <tr><td>{{ $document->document_type }}</td></tr>
                 @endforeach
             </tbody>
         </table>

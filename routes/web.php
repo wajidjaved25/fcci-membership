@@ -55,14 +55,46 @@ Route::get('/registrations/{id}/download-pdf', [RegistrationController::class, '
 // Protected routes requiring authentication
 Route::middleware(['auth'])->group(function () {
 
-    // **Workflow Routes**
-    Route::post('/registrations/{id}/verify-documents', [RegistrationController::class, 'verifyDocuments'])->name('registrations.verify');
-    Route::post('/registrations/{id}/collect-fee', [RegistrationController::class, 'collectFee'])->name('registrations.fee');
-    Route::post('/registrations/{id}/audit-documents', [RegistrationController::class, 'auditDocuments'])->name('registrations.audit');
-    Route::post('/registrations/{id}/approve-provisional', [RegistrationController::class, 'approveProvisionalMembership'])->name('registrations.provisional');
-    Route::post('/registrations/{id}/grant-final-approval', [RegistrationController::class, 'grantFinalApproval'])->name('registrations.final');
-    Route::post('/registrations/{id}/forward-to-chairman', [RegistrationController::class, 'forwardToChairman'])->name('registrations.forward_to_chairman');
+    // ✅ Workflow routes assigned to their correct controllers
+Route::middleware(['auth'])->group(function () {
 
+    // ✅ Supervisor Workflow (Document Verification & Rejection)
+    Route::post('/supervisor/registrations/{id}/verify-documents', 
+        [MembershipSupervisorController::class, 'verifyDocuments']
+    )->name('supervisor.verify');
+
+    Route::post('/supervisor/registrations/{id}/reject', 
+        [MembershipSupervisorController::class, 'rejectApplication']
+    )->name('supervisor.reject');
+
+    // ✅ Cashier Workflow (Fee Collection)
+    Route::post('/cashier/registrations/{id}/collect-fee', 
+        [CashierController::class, 'collectFee']
+    )->name('cashier.collect-fee');
+
+    // ✅ Accounts Workflow (Audit)
+    Route::post('/accounts/registrations/{id}/audit', 
+        [AccountsController::class, 'auditDocuments']
+    )->name('accounts.audit');
+
+    // ✅ Secretary Workflow (Assign Membership & Approvals)
+    Route::post('/secretary/registrations/{id}/assign-membership', 
+        [SecretaryController::class, 'assignMembershipNumber']
+    )->name('secretary.assign-membership');
+
+    Route::post('/secretary/registrations/{id}/approve-provisional', 
+        [SecretaryController::class, 'approveProvisionalMembership']
+    )->name('secretary.approve-provisional');
+
+    // ✅ Chairman Workflow (Final Approval)
+    Route::post('/chairman/registrations/{id}/approve', 
+        [ChairmanController::class, 'approveMembership']
+    )->name('chairman.approve');
+
+    Route::post('/chairman/registrations/{id}/reject', 
+        [ChairmanController::class, 'rejectMembership']
+    )->name('chairman.reject');
+});
     // **Admin Routes**
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');

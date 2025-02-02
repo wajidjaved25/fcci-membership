@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Services\SmsService;
 
 class SecretaryController extends Controller
 {
@@ -27,7 +28,7 @@ class SecretaryController extends Controller
     /**
      * Approve provisional membership and send to committee review.
      */
-    public function approveProvisionalMembership($id)
+    public function approveProvisionalMembership($id, SmsService $smsService)
 {
     Log::info("✅ Secretary Approval Function Called for Registration ID: $id");
 
@@ -77,6 +78,10 @@ class SecretaryController extends Controller
         Log::error("❌ Error: Failed to update role for User ID: {$user->id}");
         return redirect()->route('secretary.dashboard')->with('error', 'Failed to update user role.');
     }
+
+    // ✅ Send SMS confirming provisional approval
+    $message = "Dear {$registration->company_name}, your membership is provisionally approved. Membership No: {$registration->membership_number}";
+    $smsService->sendSms($registration->mobile, $message);
 
     return redirect()->route('secretary.dashboard')->with('success', 'Provisional membership approved and membership number assigned.');
 }

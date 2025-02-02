@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Registration;
 use Illuminate\Support\Facades\Auth;
+use App\Services\SmsService;
 
 class ChairmanController extends Controller
 {
@@ -37,7 +38,7 @@ class ChairmanController extends Controller
     /**
      * Approve membership application.
      */
-    public function approveMembership($id)
+    public function approveMembership($id, SmsService $smsService)
     {
         if (Auth::user()->role !== 'chairman_president') {
             return redirect()->route('home')->with('error', 'Unauthorized access.');
@@ -45,6 +46,10 @@ class ChairmanController extends Controller
 
         $registration = Registration::findOrFail($id);
         $registration->update(['status' => 'final_approval']);
+
+        // ✅ Send SMS confirming final approval
+    $message = "Dear {$registration->company_name}, congratulations! Your membership has been fully approved.";
+    $smsService->sendSms($registration->mobile, $message);
 
         return redirect()->route('chairman.dashboard')->with('success', 'Membership application approved.');
     }

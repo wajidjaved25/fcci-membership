@@ -3,28 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FCCI Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-</head>
-<body class="bg-gray-50 font-sans">
-    <nav class="bg-gray-800 text-white p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-lg font-bold">FCCI Portal</a>
-            <div class="space-x-4">
-                <a href="{{ route('home') }}" class="hover:underline">Home</a>
-                <a href="{{ route('register.show', 'proprietorship') }}" class="hover:underline">Register</a>
+    <title>FCCI - Portal</title>
 
-                <!-- Logout Link -->
+    <!-- TailwindCSS and AlpineJS CDN Links -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.5.0/cdn.min.js"></script>
+
+    <style>
+        /* Custom styles */
+        .header-bg {
+            background: linear-gradient(to right, #3b82f6, #9333ea);
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+   <!-- Header Section -->
+   <header class="header-bg shadow-xl">
+        <div class="container mx-auto px-6 py-6 flex justify-between items-center">
+            <!-- FCCI Logo Centered -->
+            <div class="flex-1 flex justify-center">
+                <img src="{{ asset('images/fcci-logo.png') }}" alt="FCCI Logo" class="h-16">
+                </div>
+
+            <!-- Logout Button (Right Corner) -->
+            <div class="flex justify-end">
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="hover:underline">
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                    class="px-4 py-2 bg-red-600 text-white rounded">
                     Logout
                 </a>
             </div>
         </div>
-    </nav>
-
+    </header>
+<body>
     <main class="container mx-auto px-4 py-10">
         @yield('content')
     </main>

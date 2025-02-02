@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use App\Services\SmsService;
 
 class CashierController extends Controller
 {
@@ -33,7 +34,7 @@ class CashierController extends Controller
     /**
      * Collect Fee & Update Registration Status
      */
-    public function collectFee(Request $request, $id)
+    public function collectFee(Request $request, $id, SmsService $smsService)
 {
     $request->validate([
         'fee_amount' => 'required|numeric|min:1',
@@ -51,6 +52,11 @@ class CashierController extends Controller
         'payment_status' => 'Paid',
         'fee_paid_at' => now(),
     ]);
+
+    // ✅ Send SMS confirming payment
+    $message = "Dear {$registration->company_name}, your payment of Rs. {$registration->fee_amount} has been received.";
+    $smsService->sendSms($registration->mobile, $message);
+
 
     // ✅ Generate Receipt URL
     $receiptUrl = route('cashier.receipt', ['id' => $registration->id]);

@@ -138,81 +138,108 @@
                 @csrf
 
                 <!-- Company Details Section -->
-                <h2 class="section-title">Company Details</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    @foreach([
-                        'company_name' => 'Company Name', 
-                        'address' => 'Address', 
-                        'telephone' => 'Telephone', 
-                        'mobile' => 'Mobile', 
-                        'email' => 'Email', 
-                        'website' => 'Website'
-                    ] as $field => $label)
-                        <div>
-                            <label for="{{ $field }}" class="label">{{ $label }}</label>
-                            <!-- Input field with inline help text -->
-                            <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}" class="input-field">
-                            <span class="help-text">Please enter your {{ strtolower($label) }}.</span>
-                        </div>
-                    @endforeach
-                </div>
+<h2 class="section-title">Company Details</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+@if($formDetails->name === 'Proprietorship')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Proprietorship">Proprietorship</option>
+    </select>
+@endif
+@if($formDetails->name === 'Partnership')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Partnership">Partnership</option>
+        <option value="AOP">Association of Persons (AOP)</option>
+    </select>
+@endif
+@if($formDetails->name === 'Limited Company')
+    <label for="firm_type" class="block text-sm font-medium text-gray-700">Firm Type:</label>
+    <select name="firm_type" id="firm_type" required class="w-full border rounded-lg p-2 mt-2">
+        <option value="Private Limited">Private Limited</option>
+        <option value="Public Limited">Public Limited</option>
+    </select>
+@endif
+    @foreach([
+        'company_name' => ['label' => 'Company Name', 'placeholder' => 'Enter your registered company name'],
+        'address' => ['label' => 'Address', 'placeholder' => 'Enter company address'],
+        'telephone' => ['label' => 'Telephone', 'placeholder' => 'Enter landline number (if any)'],
+        'mobile' => ['label' => 'Mobile', 'placeholder' => 'Enter your mobile number 92xxxxxxxxx'],
+        'email' => ['label' => 'Email', 'placeholder' => 'Enter official email address'],
+        'website' => ['label' => 'Website', 'placeholder' => 'https://yourcompany.com'] // ✅ Pre-filled https://
+    ] as $field => $data)
+        <div>
+            <label for="{{ $field }}" class="label">{{ $data['label'] }}</label>
+            <input type="text" id="{{ $field }}" name="{{ $field }}" 
+                value="{{ old($field, $field == 'website' ? 'https://' : '') }}" 
+                class="input-field" 
+                placeholder="{{ $data['placeholder'] }}">
+            
+        </div>
+    @endforeach
+</div>
 
-                <!-- Membership Details Section -->
-                <h2 class="section-title">Membership & Business Details</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="membership_class" class="label">Membership Class</label>
-                        <!-- Dropdown with inline help text -->
-                        <select id="membership_class" name="membership_class" class="input-field" required>
-                            <option value="Corporate" {{ old('membership_class') == 'Corporate' ? 'selected' : '' }}>Corporate</option>
-                            <option value="Associate" {{ old('membership_class') == 'Associate' ? 'selected' : '' }}>Associate</option>
-                        </select>
-                        <span class="help-text">Select your membership class.</span>
-                    </div>
-                    <div>
-                        <label for="year_establishment" class="label">Year of Establishment</label>
-                        <!-- Input field with inline help text -->
-                        <input type="number" id="year_establishment" name="year_establishment" value="{{ old('year_establishment') }}" class="input-field" required>
-                        <span class="help-text">Enter the year your company was established.</span>
-                    </div>
-                    <div>
-                        <label for="ntn" class="label">NTN</label>
-                        <!-- Input field with inline help text -->
-                        <input type="text" id="ntn" name="ntn" value="{{ old('ntn') }}" class="input-field">
-                        <span class="help-text">Enter your NTN (National Tax Number).</span>
-                    </div>
-                    <div>
-                        <label for="sales_tax_number" class="label">Sales Tax Number</label>
-                        <!-- Input field with inline help text -->
-                        <input type="text" id="sales_tax_number" name="sales_tax_number" value="{{ old('sales_tax_number') }}" class="input-field">
-                        <span class="help-text">Enter your Sales Tax Number.</span>
-                    </div>
-                    <div>
-                        <label for="main_business" class="label">Main Business</label>
-                        <!-- Input field with inline help text -->
-                        <input type="text" id="main_business" name="main_business" value="{{ old('main_business') }}" class="input-field">
-                        <span class="help-text">Describe your main business activity.</span>
-                    </div>
-                    <div>
-                        <label for="product_line" class="label">Product Line</label>
-                        <!-- Input field with inline help text -->
-                        <input type="text" id="product_line" name="product_line" value="{{ old('product_line') }}" class="input-field">
-                        <span class="help-text">List the main products your company sells.</span>
-                    </div>
-                </div>
+<!-- Membership Details Section -->
+<h2 class="section-title">Membership & Business Details</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+    <div>
+        <label for="membership_class" class="label">Membership Class</label>
+        <!-- Dropdown -->
+        <select id="membership_class" name="membership_class" class="input-field" required>
+            <option value="" disabled selected>Select Membership Class</option>
+            <option value="Corporate" {{ old('membership_class') == 'Corporate' ? 'selected' : '' }}>Corporate</option>
+            <option value="Associate" {{ old('membership_class') == 'Associate' ? 'selected' : '' }}>Associate</option>
+        </select>
+    </div>
 
-                <!-- Testimonial Section -->
-                <h2 class="section-title">Testimonial Details</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    @foreach(['testimonial_1' => 'Testimonial 1', 'testimonial_2' => 'Testimonial 2'] as $field => $label)
-                        <div>
-                            <label for="{{ $field }}" class="label">{{ $label }}</label>
-                            <!-- Input field with inline help text -->
-                            <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field) }}" class="input-field">
-                            <span class="help-text">Provide a short testimonial from your client.</span>
-                        </div>
-                    @endforeach
-                </div>
+    <div>
+        <label for="year_establishment" class="label">Year of Establishment</label>
+        <input type="number" id="year_establishment" name="year_establishment" 
+            value="{{ old('year_establishment') }}" class="input-field" 
+            placeholder="Enter year of your company established" required>
+    </div>
+
+    <div>
+        <label for="National Tax Number" class="label">National Tax Number</label>
+        <input type="text" id="ntn" name="ntn" value="{{ old('ntn') }}" class="input-field"
+            placeholder="Enter your (National Tax Number)">
+    </div>
+
+    <div>
+        <label for="sales_tax_number" class="label">Sales Tax Number</label>
+        <input type="text" id="sales_tax_number" name="sales_tax_number" 
+            value="{{ old('sales_tax_number') }}" class="input-field" 
+            placeholder="Enter Sales Tax Number">
+    </div>
+
+    <div>
+        <label for="main_business" class="label">Main Business</label>
+        <input type="text" id="main_business" name="main_business" 
+            value="{{ old('main_business') }}" class="input-field" 
+            placeholder="Describe your main business activity">
+    </div>
+
+    <div>
+        <label for="product_line" class="label">Product Line</label>
+        <input type="text" id="product_line" name="product_line" 
+            value="{{ old('product_line') }}" class="input-field" 
+            placeholder="Enter main products your company sells">
+    </div>
+</div>
+
+<!-- Testimonial Section -->
+<h2 class="section-title">References Details</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+    @foreach(['testimonial_1' => 'Reference 1', 'testimonial_2' => 'Reference 2'] as $field => $label)
+        <div>
+            <label for="{{ $field }}" class="label">{{ $label }}</label>
+            <input type="text" id="{{ $field }}" name="{{ $field }}" 
+                value="{{ old($field) }}" class="input-field" 
+                placeholder="Enter your Reference Membership Numberr or 0000">
+        </div>
+    @endforeach
+</div>
+
 
 <!-- Director/Partner Section -->
 <h2 class="section-title">Proprietor/Directors/Partners Details</h2>
@@ -220,16 +247,21 @@
     <div class="director-row bg-gray-100 p-6 rounded-lg mb-6 shadow-sm">
         <h3 class="text-xl font-bold text-gray-700 mb-4">Proprietor/Director/Partner 1</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            @foreach(['name' => 'Name', 'relation' => 'Son of/ Daughter of/ Wife of', 'date_of_birth' => 'Date of Birth', 'gender' => 'Gender', 'home_address' => 'Home Address', 'phone' => 'Phone'] as $field => $label)
-                <div>
-                    <label class="label">{{ $label }}</label>
-                    <input type="{{ $field === 'date_of_birth' ? 'date' : 'text' }}" name="directors[0][{{ $field }}]" class="input-field" required>
-                    <span class="help-text">Enter the {{ strtolower($label) }} of the proprietor or director.</span>
-                </div>
-            @endforeach
-<div>
+        @foreach(['name' => 'Name', 'relation' => 'Father / Husband Name', 'date_of_birth' => 'Date of Birth', 'home_address' => 'Home Address', 'phone' => 'Phone'] as $field => $label)
+     <div>
+        <label class="label">{{ $label }}</label>
+        <input type="{{ $field === 'date_of_birth' ? 'date' : 'text' }}" 
+               name="directors[0][{{ $field }}]" 
+               class="input-field" 
+               placeholder="Enter {{ $label }}" 
+               required>
+    </div>
+@endforeach
+
+            <!-- CNIC Details -->
+            <div>
                 <label for="directors[0][cnic_number]" class="label">CNIC Number</label>
-                <input type="text" name="directors[0][cnic_number]" class="input-field" required>
+                <input type="text" name="directors[0][cnic_number]" class="input-field" placeholder="Enter your CNIC Number" required>
             </div>
             <div>
                 <label for="directors[0][cnic_issue_date]" class="label">CNIC Issue Date</label>
@@ -239,6 +271,18 @@
                 <label for="directors[0][cnic_expiry_date]" class="label">CNIC Expiry Date</label>
                 <input type="date" name="directors[0][cnic_expiry_date]" class="input-field" required>
             </div>
+
+            <!-- Gender Dropdown -->
+            <div>
+                <label for="directors[0][gender]" class="label">Gender</label>
+                <select name="directors[0][gender]" class="input-field" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">male</option>
+                    <option value="female">female</option>
+                </select>
+            </div>
+
+            <!-- CNIC Document Upload -->
             <div>
                 <label class="label">CNIC Front</label>
                 <input type="file" name="directors[0][cnic_front]" class="input-field" accept="image/*,.pdf" required>
@@ -260,7 +304,7 @@
         const newIndex = container.children.length;
         const newDirector = document.querySelector('.director-row').cloneNode(true);
 
-        newDirector.querySelectorAll('input').forEach(input => {
+        newDirector.querySelectorAll('input, select').forEach(input => {
             input.name = input.name.replace(/\[\d+\]/, `[${newIndex}]`);
             input.value = '';
         });
@@ -279,6 +323,7 @@
         }
     });
 </script>
+
                 <!-- Document Upload Section -->
                 <h2 class="section-title mt-8">Required Documents</h2>
                @foreach ($documentRequirements as $index => $document)

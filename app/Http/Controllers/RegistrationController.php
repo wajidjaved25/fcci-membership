@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use App\Services\SmsService;
 
 class RegistrationController extends Controller
 {
@@ -30,7 +31,7 @@ class RegistrationController extends Controller
     /**
      * Submit the registration form.
      */
-    public function submitForm(Request $request, $form)
+    public function submitForm(Request $request, $form, SmsService $smsService)
     {
         try {
             $formDetails = RegistrationForm::where('name', $form)->firstOrFail();
@@ -73,18 +74,20 @@ class RegistrationController extends Controller
             ]);
 
             // Create User or Retrieve Existing
-            $user = User::firstOrCreate(
-                [
-                    'mobile_number' => $validated['mobile'],
-                    'email' => $validated['email'],
-                ],
-                [
-                    'name' => $validated['company_name'],
-                    'password' => bcrypt('temporary-password'),
-                    'role' => 'pending',
-                ]
-            );
+            $user = User::where('mobile_number', $validated['mobile'])->first();
 
+if (!$user) {
+    // ✅ Create a new user only if it doesn't exist
+    $user = User::create([
+        'mobile_number' => $validated['mobile'],
+        'email' => $validated['email'],
+        'name' => $validated['company_name'], // Keep name based on first registration
+        'password' => bcrypt('temporary-password'),
+        'role' => 'pending', // Default role
+    ]);
+} else {
+    Log::info("🔹 Existing user found for mobile: {$validated['mobile']}, Associating new registration.");
+}
             // Create Registration
             $registration = Registration::create([
                 'user_id' => $user->id,
@@ -156,6 +159,10 @@ if ($request->hasFile('documents')) {
     }
 }
 
+              // ✅ Send SMS to applicant
+              $message = "Dear {$registration->company_name}, your application has been submitted successfully.";
+              $smsService->sendSms($registration->mobile, $message);
+
 
             // Generate PDF
             $pdf = Pdf::loadView('pdf.registration', compact('registration'));
@@ -167,6 +174,8 @@ if ($request->hasFile('documents')) {
                 'success' => 'Registration submitted successfully!',
                 'download_url' => asset('storage/' . $pdfPath)
             ]);
+
+    return redirect()->route('register.show', $form)->with('success', 'Application submitted!');
 
         } catch (\Exception $e) {
             \Log::error('Error during registration: ' . $e->getMessage());
@@ -203,32 +212,5 @@ public function downloadPDF($id)
     /**
      * Workflow Steps
      */
-    public function verifyDocuments($id) { return $this->updateRegistrationStatus($id, 'fee_due', 'Documents verified. Fee payment required.'); }
-    
-    public function collectFee($id) { 
-        return $this->updateRegistrationStatus($id, 'fee_paid', 'Fee collected successfully.', [
-            'fee_paid_at' => now(),
-            'payment_status' => 'Paid'
-        ]); 
-    }
 
-    public function auditDocuments($id) { return $this->updateRegistrationStatus($id, 'audited', 'Documents audited successfully.'); }
-    
-    public function approveProvisionalMembership($id) { return $this->updateRegistrationStatus($id, 'provisionally_approved', 'Provisional membership approved.'); }
-    
-    public function grantFinalApproval($id) { return $this->updateRegistrationStatus($id, 'final_approval', 'Membership approved.'); }
-public function forwardToChairman($id)
-{
-    $registration = Registration::findOrFail($id);
-
-    // Ensure only the secretary can forward the application
-    if (Auth::user()->role !== 'dg_secretary') {
-        return redirect()->route('home')->with('error', 'Unauthorized action.');
-    }
-
-    // Update application status
-    $registration->update(['status' => 'provisionally_approved']);
-
-    return redirect()->route('secretary.dashboard')->with('success', 'Application forwarded to Chairman for final approval.');
-}
 }

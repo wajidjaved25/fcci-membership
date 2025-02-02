@@ -33,7 +33,7 @@
                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                                     View Application
                                 </a>
-                                <form action="{{ route('registrations.audit', $registration->id) }}" method="POST" class="inline-block">
+                                <form action="{{ route('accounts.audit', $registration->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                                         Approve Audit
