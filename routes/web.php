@@ -101,6 +101,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/registrations/{id}', [AdminController::class, 'show'])->name('show');
         Route::post('/registrations/{id}/approve', [AdminController::class, 'approve'])->name('approve');
         Route::post('/registrations/{id}/reject', [AdminController::class, 'reject'])->name('reject');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::post('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+        Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     });
 
     // **Membership Supervisor Routes**

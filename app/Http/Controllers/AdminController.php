@@ -21,10 +21,14 @@ class AdminController extends Controller
             return redirect('/home')->with('error', 'Access denied.');
         }
 
-        // Fetch pending registrations
-        $registrations = Registration::whereNull('status')->get();
+        // ✅ Fetch All Pending Registrations
+        $registrations = Registration::where('status', 'pending')->paginate(10);
 
-        return view('admin.dashboard', compact('registrations'));
+        // ✅ Fetch All Users
+        $users = User::orderBy('created_at', 'desc')->paginate(10);
+
+        // ✅ Pass Users & Registrations to View
+        return view('admin.dashboard', compact('registrations', 'users'));
     }
 
     /**
@@ -122,5 +126,36 @@ public function downloadPDF($id)
     }
 
     return redirect()->back()->with('error', 'PDF not found.');
+}
+public function users()
+{
+    $users = User::where('role', '!=', 'admin')->paginate(10);
+    return view('admin.users', compact('users'));
+}
+
+public function createUser(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'mobile_number' => 'required|digits_between:10,15|unique:users,mobile_number',
+        'email' => 'nullable|email|unique:users,email',
+        'role' => 'required|string|in:membership_supervisor,cashier,accounts_audit,dg_secretary,chairman_president,member',
+    ]);
+
+    User::create([
+        'name' => $request->name,
+        'mobile_number' => $request->mobile_number,
+        'email' => $request->email,
+        'password' => bcrypt('defaultpassword'),
+        'role' => $request->role,
+    ]);
+
+    return redirect()->route('admin.users')->with('success', 'User created successfully.');
+}
+
+public function deleteUser($id)
+{
+    User::findOrFail($id)->delete();
+    return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
 }
 }

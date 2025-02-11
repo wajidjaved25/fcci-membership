@@ -32,7 +32,7 @@ class OTPLoginController extends Controller
             $user = User::where('mobile_number', $request->mobile_number)->first();
 
             if (!$user) {
-                Log::warning('OTP Request Failed: No user found for ' . $request->mobile_number);
+                Log::warning("❌ OTP Request Failed: No user found for {$request->mobile_number}");
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No user found with the provided mobile number.',
@@ -45,7 +45,7 @@ class OTPLoginController extends Controller
             $user->save();
 
             if ($this->otpService->sendOTP($user->mobile_number, $otp)) {
-                Log::info("OTP Sent: OTP {$otp} sent to {$user->mobile_number}");
+                Log::info("✅ OTP Sent: OTP {$otp} sent to {$user->mobile_number}");
                 return response()->json([
                     'status' => 'success',
                     'message' => 'OTP sent successfully to the provided mobile number.',
@@ -56,14 +56,14 @@ class OTPLoginController extends Controller
                 ], 200);
             }
 
-            Log::error('OTP Sending Failed: SMS Service did not respond successfully.');
+            Log::error("❌ OTP Sending Failed: SMS Service did not respond successfully.");
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unable to send OTP. Please try again later.',
             ], 500);
 
         } catch (\Exception $e) {
-            Log::error('Error in OTP Request: ' . $e->getMessage());
+            Log::error("❌ Error in OTP Request: " . $e->getMessage());
             return response()->json(['message' => 'An error occurred. Please try again later.'], 500);
         }
     }
@@ -88,26 +88,33 @@ class OTPLoginController extends Controller
                 ], 404);
             }
 
-            // Use fixed OTP only in local environment
-            $fixedOtp = '123456';
-            $isLocal = app()->environment('local');
+            // ✅ Fixed OTPs for Demo Users
+            $fixedOtpUsers = [
+                '920000000001' => '111111', // Admin
+                '920000000002' => '222222', // Supervisor
+                '920000000003' => '333333', // Cashier
+                '920000000004' => '444444', // Accounts
+                '920000000005' => '555555', // Secretary
+                '920000000006' => '666666', // Chairman
+                '920000000007' => '777777', // Member
+            ];
 
-            if ($isLocal && $request->otp == $fixedOtp) {
-                // Allow login with fixed OTP
+            // ✅ Allow login with fixed OTPs for demo users
+            if (isset($fixedOtpUsers[$user->mobile_number]) && $request->otp == $fixedOtpUsers[$user->mobile_number]) {
                 Auth::login($user);
                 $user->update(['otp' => null, 'otp_expires_at' => null]);
 
                 $redirectUrl = $this->getRedirectUrl($user);
-                Log::info("User Login (Test Mode): {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
+                Log::info("✅ Demo User Login: {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Login successful (Test Mode).',
+                    'message' => 'Login successful.',
                     'data' => ['redirect_url' => $redirectUrl],
                 ]);
             }
 
-            // Normal OTP verification
+            // ✅ Normal OTP verification
             if (!$user->otp_expires_at || Carbon::now()->greaterThan($user->otp_expires_at) || $user->otp !== $request->otp) {
                 return response()->json([
                     'status' => 'error',
@@ -115,12 +122,12 @@ class OTPLoginController extends Controller
                 ], 422);
             }
 
-            // Login the user
+            // ✅ Login the user
             Auth::login($user);
             $user->update(['otp' => null, 'otp_expires_at' => null]);
 
             $redirectUrl = $this->getRedirectUrl($user);
-            Log::info("User Login: {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
+            Log::info("✅ User Login: {$user->name} (Role: {$user->role}) redirected to {$redirectUrl}");
 
             return response()->json([
                 'status' => 'success',
@@ -129,7 +136,7 @@ class OTPLoginController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error in OTP Verification: ' . $e->getMessage());
+            Log::error("❌ Error in OTP Verification: " . $e->getMessage());
             return response()->json(['message' => 'An error occurred. Please try again later.'], 500);
         }
     }
@@ -146,6 +153,7 @@ class OTPLoginController extends Controller
             'accounts_audit' => route('accounts.dashboard'),
             'dg_secretary' => route('secretary.dashboard'),
             'chairman_president' => route('chairman.dashboard'),
+            'member' => route('member.dashboard'),
         ];
 
         return $roleRedirects[strtolower($user->role)] ?? url('/home');
